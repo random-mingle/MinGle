@@ -977,24 +977,7 @@ export default function ChatRoom() {
                   transform: 'scaleX(-1)',
                 }}
               />
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 14,
-                  left: 14,
-                  padding: '5px 14px',
-                  borderRadius: 20,
-                  background: 'rgba(10,10,10,0.65)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(212,175,55,0.25)',
-                  color: 'rgba(212,175,55,0.9)',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: '0.1em',
-                }}
-              >
-                STRANGER
-              </div>
+            
               {status !== 'connected' && (
                 <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
                   <span style={{ fontSize: 64, opacity: 0.1 }}>👤</span>
@@ -1032,24 +1015,7 @@ export default function ChatRoom() {
                   filter: isVideoOff ? 'brightness(0)' : 'none',
                 }}
               />
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 14,
-                  left: 14,
-                  padding: '5px 14px',
-                  borderRadius: 20,
-                  background: 'rgba(10,10,10,0.65)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(212,175,55,0.25)',
-                  color: 'rgba(212,175,55,0.9)',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: '0.1em',
-                }}
-              >
-                YOU
-              </div>
+              
               {isVideoOff && (
                 <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
                   <span style={{ fontSize: 52, opacity: 0.2 }}>🎥</span>
