@@ -1290,8 +1290,8 @@ function MessageBubble({ msg, compact }) {
     maxWidth: '90%',
     wordBreak: 'break-word',
     fontFamily: '"DM Sans", sans-serif',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
+    backdropFilter: 'blur(4px)',
+WebkitBackdropFilter: 'blur(4px)',
     animation: 'fadeSlide 0.2s ease-out',
     pointerEvents: 'auto',
   };
@@ -1319,9 +1319,11 @@ function MessageBubble({ msg, compact }) {
       <div style={{
         ...base,
         alignSelf: 'flex-end',
-        background: 'linear-gradient(135deg, rgba(212,175,55,0.3), rgba(184,134,11,0.2))',
+      background: '#D4AF37',
+color: '#000',
+fontWeight: 600,
         border: '1px solid rgba(212,175,55,0.35)',
-        color: '#fff',
+      
         borderRadius: '14px 14px 4px 14px',
         textShadow: '0 1px 3px rgba(0,0,0,0.5)',
       }}>
@@ -1334,9 +1336,10 @@ function MessageBubble({ msg, compact }) {
     <div style={{
       ...base,
       alignSelf: 'flex-start',
-      background: 'rgba(255,255,255,0.09)',
+     background: 'rgba(0,0,0,0.6)',
+color: '#fff',
       border: '1px solid rgba(255,255,255,0.12)',
-      color: 'rgba(255,255,255,0.9)',
+      
       borderRadius: '14px 14px 14px 4px',
       textShadow: '0 1px 3px rgba(0,0,0,0.6)',
     }}>
