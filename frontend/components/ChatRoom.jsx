@@ -321,6 +321,14 @@ export default function ChatRoom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+// ── Auto-attach local stream
+useEffect(() => {
+  if (localStreamRef.current && localVideoRef.current) {
+    if (localVideoRef.current.srcObject !== localStreamRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+  }
+}, []); // 🔥 only once run
 
   // ── Initialise media + socket on mount ────────────────────────────
   useEffect(() => {
@@ -367,10 +375,7 @@ export default function ChatRoom() {
     const BACKEND = "https://mingle-kfcz.onrender.com";
     const socket = io(BACKEND, {
     transports: ['websocket', 'polling'],
-     reconnection: true,
-  reconnectionAttempts: 10,
-  reconnectionDelay: 1000,
-  timeout: 20000,
+    
       reconnection: true,
       reconnectionAttempts: 5,
     });
