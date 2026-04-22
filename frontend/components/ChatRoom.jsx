@@ -922,7 +922,7 @@ export default function ChatRoom() {
             </div>
 
             {/* Chat overlay — left side, over both videos */}
-            <MobileChatOverlay messages={messages} />
+            // <MobileChatOverlay messages={messages} />
 
             {/* Right-side control buttons — floating over videos */}
             <div
