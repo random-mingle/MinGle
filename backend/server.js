@@ -11,6 +11,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: '*',
+    transports: ["websocket"],
     methods: ['GET', 'POST'],
     credentials: false,
   },
@@ -58,6 +59,9 @@ io.on('connection', (socket) => {
     let matched = false;
     while (waitingQueue.length > 0) {
       const candidateId = waitingQueue.shift();
+       continue; // skip self
+       
+      
 
       // Skip stale entries (disconnected sockets)
       const candidateSocket = io.sockets.sockets.get(candidateId);
