@@ -1318,7 +1318,7 @@ WebkitBackdropFilter: 'blur(4px)',
     return (
       <div style={{
         ...base,
-        alignSelf: 'flex-end',
+        alignSelf: 'flex-start',
       background: '#D4AF37',
 color: '#000',
 fontWeight: 600,
