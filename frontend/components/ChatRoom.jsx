@@ -779,7 +779,60 @@ const handleNext = () => {
 
       {/* ── Main area ──────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
+{/* 🔥 CENTER LOGO */}
+<div
+  style={{
+    position: 'absolute',
+    top: isMobile ? '50%' : '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: 999,
+    pointerEvents: 'none',
+  }}
+>
 
+  {/* Desktop logo */}
+  {!isMobile && (
+    <img
+      src="/logo.png"
+      style={{
+        width: '100px',
+        opacity: 0.9,
+      }}
+    />
+  )}
+
+  {/* Mobile split logo */}
+  {isMobile && (
+    <div style={{ position: 'relative', width: 120, height: 50 }}>
+
+      {/* TOP HALF */}
+      <img
+        src="/logo.png"
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          clipPath: 'inset(0 0 50% 0)',
+        }}
+      />
+
+      {/* BOTTOM HALF */}
+      <img
+        src="/logo.png"
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          clipPath: 'inset(50% 0 0 0)',
+        }}
+      />
+
+    </div>
+  )}
+</div>
         {/* ── MOBILE layout ────────────────────────────────────────── */}
         {isMobile ? (
           <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
@@ -1053,60 +1106,7 @@ const handleNext = () => {
                 ))}
               </div>
             </div>
-{/* 🔥 CENTER LOGO */}
-<div
-  style={{
-    position: 'absolute',
-    top: isMobile ? '45%' : '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    zIndex: 999,
-    pointerEvents: 'none',
-  }}
->
 
-  {/* Desktop logo */}
-  {!isMobile && (
-    <img
-      src="/logo.png"
-      style={{
-        width: '100px',
-        opacity: 0.9,
-      }}
-    />
-  )}
-
-  {/* Mobile split logo */}
-  {isMobile && (
-    <div style={{ position: 'relative', width: 120, height: 50 }}>
-
-      {/* TOP HALF */}
-      <img
-        src="/logo.png"
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          clipPath: 'inset(0 0 50% 0)',
-        }}
-      />
-
-      {/* BOTTOM HALF */}
-      <img
-        src="/logo.png"
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          clipPath: 'inset(50% 0 0 0)',
-        }}
-      />
-
-    </div>
-  )}
-</div>
           </div>
         )}
 
