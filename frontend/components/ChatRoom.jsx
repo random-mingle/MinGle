@@ -432,12 +432,20 @@ useEffect(() => {
       ]);
     });
 
-    socket.on('partner_disconnected', () => {
-      closePC();
-      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
-      setStatus('idle');
-      addSysMsg('Stranger disconnected. Click Start to find someone new!');
-    });
+   socket.on('partner_disconnected', () => {
+  closePC();
+
+  if (remoteVideoRef.current) {
+    remoteVideoRef.current.srcObject = null;
+  }
+
+  setStatus('waiting');
+
+  // 🔥 NEW ADD (IMPORTANT)
+  addSysMsg('Stranger disconnected... finding new one 🔄');
+
+  socket.emit('find_match'); // auto next
+});
 
     socket.on('find_match_trigger', () => {
       socket.emit('find_match');
