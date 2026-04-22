@@ -788,6 +788,7 @@ export default function ChatRoom() {
 
       {/* ── Main area ──────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
+
         {/* 🔥 CENTER LOGO */}
         <div
           style={{
@@ -1137,6 +1138,16 @@ export default function ChatRoom() {
             }}
           >
             <span style={{ fontSize: 56, filter: 'drop-shadow(0 0 20px rgba(212,175,55,0.7))' }}>♛</span>
+            {status === 'connected' && (
+  <img
+    src="/logo.png"
+    style={{
+      width: '100px',
+      opacity: 0.9,
+      marginTop: 10
+    }}
+  />
+)}
             <div style={{ textAlign: 'center' }}>
               <p
                 style={{
