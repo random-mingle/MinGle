@@ -155,3 +155,8 @@ const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
   console.log(`🚀 Mingle backend running on http://localhost:${PORT}`);
 });
+
+/* 🔥 KEEP SERVER ALIVE */
+setInterval(() => {
+  console.log("Server alive ping");
+}, 30000);
