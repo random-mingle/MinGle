@@ -364,9 +364,9 @@ export default function ChatRoom() {
 
   /* ── Socket ─────────────────────────────────────────────────────── */
   const initSocket = () => {
-    const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+    const BACKEND = "https://mingle-kfcz.onrender.com";
     const socket = io(BACKEND, {
-      transports: ['websocket', 'polling'],
+    transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
     });
