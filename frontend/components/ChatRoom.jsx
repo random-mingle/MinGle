@@ -1149,7 +1149,13 @@ const handleNext = () => {
           className="chat-input"
           type="text"
           value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
+          onChange={(e) => {
+  setInputText(e.target.value);
+
+  if (socketRef.current && partnerIdRef.current) {
+    socketRef.current.emit('typing');
+  }
+}}
           onKeyDown={handleKeyDown}
           placeholder={
             status === 'connected'
