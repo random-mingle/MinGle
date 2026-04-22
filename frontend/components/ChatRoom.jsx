@@ -783,7 +783,7 @@ const handleNext = () => {
 <div
   style={{
     position: 'absolute',
-    top: isMobile ? '50%' : '50%',
+    top: isMobile ? '5%' : '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
     zIndex: 999,
