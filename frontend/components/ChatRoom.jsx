@@ -789,61 +789,63 @@ export default function ChatRoom() {
       {/* ── Main area ──────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
 
-        {/* 🔥 CENTER LOGO */}
-        <div
+
+  {/* 🔥 CENTER LOGO — only show after connected */}
+  {status === 'connected' && (
+    <div
+      style={{
+        position: 'absolute',
+        top: isMobile ? '5%' : '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 999,
+        pointerEvents: 'none',
+      }}
+    >
+      {/* Desktop logo */}
+      {!isMobile && (
+        <img
+          src="/logo.png"
           style={{
-            position: 'absolute',
-            top: isMobile ? '5%' : '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 999,
-            pointerEvents: 'none',
+            width: '100px',
+            opacity: 0.9,
           }}
-        >
+        />
+      )}
 
-          {/* Desktop logo */}
-          {!isMobile && (
-            <img
-              src="/logo.png"
-              style={{
-                width: '100px',
-                opacity: 0.9,
-              }}
-            />
-          )}
+      {/* Mobile split logo */}
+      {isMobile && (
+        <div style={{ position: 'relative', width: 120, height: 50 }}>
 
-          {/* Mobile split logo */}
-          {isMobile && (
-            <div style={{ position: 'relative', width: 120, height: 50 }}>
+          {/* TOP HALF */}
+          <img
+            src="/logo.png"
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              clipPath: 'inset(0 0 50% 0)',
+            }}
+          />
 
-              {/* TOP HALF */}
-              <img
-                src="/logo.png"
-                style={{
-                  position: 'absolute',
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  clipPath: 'inset(0 0 50% 0)',
-                }}
-              />
+          {/* BOTTOM HALF */}
+          <img
+            src="/logo.png"
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              clipPath: 'inset(50% 0 0 0)',
+            }}
+          />
 
-              {/* BOTTOM HALF */}
-              <img
-                src="/logo.png"
-                style={{
-                  position: 'absolute',
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  clipPath: 'inset(50% 0 0 0)',
-                }}
-              />
-
-            </div>
-          )}
         </div>
-
+      )}
+    </div>
+  )}
+  
         {/* ── MOBILE layout ────────────────────────────────────────── */}
         {isMobile ? (
           <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
@@ -1138,16 +1140,6 @@ export default function ChatRoom() {
             }}
           >
             <span style={{ fontSize: 56, filter: 'drop-shadow(0 0 20px rgba(212,175,55,0.7))' }}>♛</span>
-            {status === 'connected' && (
-  <img
-    src="/logo.png"
-    style={{
-      width: '100px',
-      opacity: 0.9,
-      marginTop: 10
-    }}
-  />
-)}
             <div style={{ textAlign: 'center' }}>
               <p
                 style={{
