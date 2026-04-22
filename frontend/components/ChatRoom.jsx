@@ -560,13 +560,26 @@ if (sender) {
     setStatus('waiting');
   };
 
-  const handleNext = () => {
-    closePC();
-    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
-    socketRef.current?.emit('next');
-    setStatus('waiting');
-    setMessages([]);
-  };
+const handleNext = () => {
+  closePC();
+
+  // video clear
+  if (remoteVideoRef.current) {
+    remoteVideoRef.current.srcObject = null;
+  }
+
+  // chat clear
+  setMessages([]);
+
+  // status update
+  setStatus('waiting');
+
+  // message
+  addSysMsg('🔎 Finding new stranger...');
+
+  // find new match
+  socketRef.current.emit('find_match');
+};
 
   const handleMute = () => {
     const track = localStreamRef.current?.getAudioTracks()[0];
