@@ -59,7 +59,7 @@ io.on('connection', (socket) => {
     let matched = false;
     while (waitingQueue.length > 0) {
       const candidateId = waitingQueue.shift();
-       continue; // skip self
+      
        
       
 
