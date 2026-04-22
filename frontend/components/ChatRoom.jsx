@@ -374,7 +374,7 @@ useEffect(() => {
   const initSocket = () => {
     const BACKEND = "https://mingle-kfcz.onrender.com";
     const socket = io(BACKEND, {
-    transports: ['websocket', 'polling'],
+    transports: ['websocket'],
     
       reconnection: true,
       reconnectionAttempts: 5,
