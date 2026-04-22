@@ -321,12 +321,6 @@ export default function ChatRoom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // ── Auto-attach local stream ───────────────────────────────────────
-  useEffect(() => {
-    if (localStreamRef.current && localVideoRef.current) {
-      localVideoRef.current.srcObject = localStreamRef.current;
-    }
-  });
 
   // ── Initialise media + socket on mount ────────────────────────────
   useEffect(() => {
@@ -342,9 +336,9 @@ export default function ChatRoom() {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'user',
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 30 }
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: 24 }
         },
         audio: {
           echoCancellation: true,
@@ -357,6 +351,7 @@ export default function ChatRoom() {
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
+      
     } catch (err) {
       console.error('Media error:', err);
       setMediaError(
@@ -831,6 +826,7 @@ if (sender) {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
+                  backgroundColor: "#000",
                   display: 'block',
                   transform: 'scaleX(-1)',
                   filter: isVideoOff ? 'brightness(0)' : 'none',
@@ -968,6 +964,7 @@ if (sender) {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
+                  backgroundColor: "#000",
                   display: 'block',
                   transform: 'scaleX(-1)',
                   filter: isVideoOff ? 'brightness(0)' : 'none',
