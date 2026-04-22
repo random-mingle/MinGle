@@ -396,7 +396,6 @@ useEffect(() => {
       partnerIdRef.current = partnerId;
       setStatus('connected');
       setMessages([]);
-      addSysMsg('MINGLE.');
       await createPC(initiator, partnerId);
     });
 
