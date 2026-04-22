@@ -278,7 +278,7 @@ function ReportModal({ onClose, onSubmit }) {
 /* ── Main ChatRoom ────────────────────────────────────────────────────── */
 export default function ChatRoom() {
   const [isTyping, setIsTyping] = useState(false);
-  
+
   const router = useRouter();
 
   // ── State ──────────────────────────────────────────────────────────
@@ -293,7 +293,7 @@ export default function ChatRoom() {
   const [isMobile, setIsMobile] = useState(false);
   const [mediaReady, setMediaReady] = useState(false);
   const [mediaError, setMediaError] = useState('');
-  
+
 
   // ── Refs ───────────────────────────────────────────────────────────
   const socketRef = useRef(null);
@@ -307,6 +307,8 @@ export default function ChatRoom() {
   const remoteDescSetRef = useRef(false);
   const statusRef = useRef('idle');
   const inputRef = useRef(null);
+  // FIX: ref to clear typing timeout properly
+  const typingTimeoutRef = useRef(null);
 
   // Keep statusRef in sync
   useEffect(() => { statusRef.current = status; }, [status]);
@@ -324,14 +326,14 @@ export default function ChatRoom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-// ── Auto-attach local stream
-useEffect(() => {
-  if (localStreamRef.current && localVideoRef.current) {
-    if (localVideoRef.current.srcObject !== localStreamRef.current) {
-      localVideoRef.current.srcObject = localStreamRef.current;
+  // ── Auto-attach local stream
+  useEffect(() => {
+    if (localStreamRef.current && localVideoRef.current) {
+      if (localVideoRef.current.srcObject !== localStreamRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
     }
-  }
-}, []); // 🔥 only once run
+  }, []); // 🔥 only once run
 
   // ── Initialise media + socket on mount ────────────────────────────
   useEffect(() => {
@@ -362,7 +364,7 @@ useEffect(() => {
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
-      
+
     } catch (err) {
       console.error('Media error:', err);
       setMediaError(
@@ -377,8 +379,8 @@ useEffect(() => {
   const initSocket = () => {
     const BACKEND = "https://mingle-kfcz.onrender.com";
     const socket = io(BACKEND, {
-    transports: ['websocket'],
-    
+      transports: ['websocket'],
+
       reconnection: true,
       reconnectionAttempts: 5,
     });
@@ -434,20 +436,27 @@ useEffect(() => {
       ]);
     });
 
-   socket.on('partner_disconnected', () => {
-  closePC();
+    // FIX: missing typing listener — isTyping state was never set to true
+    socket.on('typing', () => {
+      setIsTyping(true);
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 2000);
+    });
 
-  if (remoteVideoRef.current) {
-    remoteVideoRef.current.srcObject = null;
-  }
+    socket.on('partner_disconnected', () => {
+      closePC();
 
-  setStatus('waiting');
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = null;
+      }
 
-  // 🔥 NEW ADD (IMPORTANT)
-  addSysMsg('Stranger disconnected... finding new one 🔄');
+      setStatus('waiting');
 
-  socket.emit('find_match'); // auto next
-});
+      // 🔥 NEW ADD (IMPORTANT)
+      addSysMsg('Stranger disconnected... finding new one 🔄');
+
+      socket.emit('find_match'); // auto next
+    });
 
     socket.on('find_match_trigger', () => {
       socket.emit('find_match');
@@ -509,19 +518,19 @@ useEffect(() => {
 
     if (initiator) {
       // 🔥 VIDEO QUALITY BOOST
-const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+      const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
 
-if (sender) {
-  const params = sender.getParameters();
+      if (sender) {
+        const params = sender.getParameters();
 
-  if (!params.encodings) {
-    params.encodings = [{}];
-  }
+        if (!params.encodings) {
+          params.encodings = [{}];
+        }
 
-  params.encodings[0].maxBitrate = 1500000; // 1.5 Mbps
+        params.encodings[0].maxBitrate = 1500000; // 1.5 Mbps
 
-  sender.setParameters(params);
-}
+        sender.setParameters(params);
+      }
       const offer = await pc.createOffer({
         offerToReceiveVideo: true,
         offerToReceiveAudio: true,
@@ -562,26 +571,26 @@ if (sender) {
     setStatus('waiting');
   };
 
-const handleNext = () => {
-  closePC();
+  const handleNext = () => {
+    closePC();
 
-  // video clear
-  if (remoteVideoRef.current) {
-    remoteVideoRef.current.srcObject = null;
-  }
+    // video clear
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
 
-  // chat clear
-  setMessages([]);
+    // chat clear
+    setMessages([]);
 
-  // status update
-  setStatus('waiting');
+    // status update
+    setStatus('waiting');
 
-  // message
-  addSysMsg('🔎 Finding new stranger...');
+    // message
+    addSysMsg('🔎 Finding new stranger...');
 
-  // find new match
-  socketRef.current.emit('find_match');
-};
+    // find new match
+    socketRef.current.emit('find_match');
+  };
 
   const handleMute = () => {
     const track = localStreamRef.current?.getAudioTracks()[0];
@@ -779,60 +788,61 @@ const handleNext = () => {
 
       {/* ── Main area ──────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
-{/* 🔥 CENTER LOGO */}
-<div
-  style={{
-    position: 'absolute',
-    top: isMobile ? '5%' : '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    zIndex: 999,
-    pointerEvents: 'none',
-  }}
->
+        {/* 🔥 CENTER LOGO */}
+        <div
+          style={{
+            position: 'absolute',
+            top: isMobile ? '5%' : '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 999,
+            pointerEvents: 'none',
+          }}
+        >
 
-  {/* Desktop logo */}
-  {!isMobile && (
-    <img
-      src="/logo.png"
-      style={{
-        width: '100px',
-        opacity: 0.9,
-      }}
-    />
-  )}
+          {/* Desktop logo */}
+          {!isMobile && (
+            <img
+              src="/logo.png"
+              style={{
+                width: '100px',
+                opacity: 0.9,
+              }}
+            />
+          )}
 
-  {/* Mobile split logo */}
-  {isMobile && (
-    <div style={{ position: 'relative', width: 120, height: 50 }}>
+          {/* Mobile split logo */}
+          {isMobile && (
+            <div style={{ position: 'relative', width: 120, height: 50 }}>
 
-      {/* TOP HALF */}
-      <img
-        src="/logo.png"
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          clipPath: 'inset(0 0 50% 0)',
-        }}
-      />
+              {/* TOP HALF */}
+              <img
+                src="/logo.png"
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  clipPath: 'inset(0 0 50% 0)',
+                }}
+              />
 
-      {/* BOTTOM HALF */}
-      <img
-        src="/logo.png"
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          clipPath: 'inset(50% 0 0 0)',
-        }}
-      />
+              {/* BOTTOM HALF */}
+              <img
+                src="/logo.png"
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  clipPath: 'inset(50% 0 0 0)',
+                }}
+              />
 
-    </div>
-  )}
-</div>
+            </div>
+          )}
+        </div>
+
         {/* ── MOBILE layout ────────────────────────────────────────── */}
         {isMobile ? (
           <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
@@ -1110,8 +1120,6 @@ const handleNext = () => {
           </div>
         )}
 
-    
-
         {/* Idle overlay (START screen) */}
         {status === 'idle' && (
           <div
@@ -1184,78 +1192,79 @@ const handleNext = () => {
         )}
       </div>
 
-      {/* ── Chat input bar ──────────────────────────────────────────── */}
-      <div
-        style={{
-          flexShrink: 0,
-          padding: '10px 12px',
-          background: 'rgba(10,10,10,0.95)',
-          borderTop: '1px solid rgba(212,175,55,0.12)',
-          display: 'flex',
-          gap: 8,
-          alignItems: 'center',
-          zIndex: 20,
-        }}
-      >
-        <input
-          ref={inputRef}
-          className="chat-input"
-          type="text"
-          value={inputText}
-          onChange={(e) => {
-  setInputText(e.target.value);
-
-  if (socketRef.current && partnerIdRef.current) {
-    socketRef.current.emit('typing');
-  }
-}}
-          onKeyDown={handleKeyDown}
-          placeholder={
-            status === 'connected'
-              ? 'Type a message… (Enter to send)'
-              : 'Connect to start chatting'
-          }
-          disabled={status !== 'connected'}
-          maxLength={500}
+      {/* ── Chat input bar + typing indicator (FIX: wrapped together so typing shows above input) ── */}
+      <div style={{ flexShrink: 0 }}>
+        {isTyping && (
+          <div style={{
+            fontSize: 12,
+            color: 'rgba(255,255,255,0.6)',
+            fontStyle: 'italic',
+            padding: '4px 16px 0',
+          }}>
+            Stranger is typing...
+          </div>
+        )}
+        <div
           style={{
-            flex: 1,
-            padding: '12px 16px',
-            borderRadius: 50,
-            fontSize: 14,
-            opacity: status !== 'connected' ? 0.5 : 1,
-          }}
-        />
-        <button
-          onClick={handleSend}
-          disabled={status !== 'connected' || !inputText.trim()}
-          className="btn-gold"
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: '50%',
-            padding: 0,
+            padding: '10px 12px',
+            background: 'rgba(10,10,10,0.95)',
+            borderTop: '1px solid rgba(212,175,55,0.12)',
             display: 'flex',
+            gap: 8,
             alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            opacity: (status !== 'connected' || !inputText.trim()) ? 0.4 : 1,
-            cursor: (status !== 'connected' || !inputText.trim()) ? 'not-allowed' : 'pointer',
+            zIndex: 20,
           }}
-          aria-label="Send message"
         >
-          <Icons.Send />
-        </button>
+          <input
+            ref={inputRef}
+            className="chat-input"
+            type="text"
+            value={inputText}
+            onChange={(e) => {
+              setInputText(e.target.value);
+
+              if (socketRef.current && partnerIdRef.current) {
+                socketRef.current.emit('typing');
+              }
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder={
+              status === 'connected'
+                ? 'Type a message… (Enter to send)'
+                : 'Connect to start chatting'
+            }
+            disabled={status !== 'connected'}
+            maxLength={500}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              borderRadius: 50,
+              fontSize: 14,
+              opacity: status !== 'connected' ? 0.5 : 1,
+            }}
+          />
+          <button
+            onClick={handleSend}
+            disabled={status !== 'connected' || !inputText.trim()}
+            className="btn-gold"
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              opacity: (status !== 'connected' || !inputText.trim()) ? 0.4 : 1,
+              cursor: (status !== 'connected' || !inputText.trim()) ? 'not-allowed' : 'pointer',
+            }}
+            aria-label="Send message"
+          >
+            <Icons.Send />
+          </button>
+        </div>
       </div>
-      {isTyping && (
-  <div style={{
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.6)',
-    fontStyle: 'italic',
-    marginTop: 5
-  }}>
-    Stranger is typing...
-  </div>
-)}
 
       {/* ── Report modal ─────────────────────────────────────────────── */}
       {showReport && (
@@ -1331,7 +1340,6 @@ function MobileChatOverlay({ messages }) {
         padding: '10px 8px',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'flex-end',
         gap: 6,
         zIndex: 20,
         pointerEvents: 'none',
@@ -1340,6 +1348,8 @@ function MobileChatOverlay({ messages }) {
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
       }}
     >
+      {/* FIX: spacer pushes messages to bottom when few; allows scroll when many */}
+      <div style={{ flex: 1, minHeight: 0 }} />
       {messages.slice(-20).map((m) => (
         <MessageBubble key={m.id} msg={m} compact />
       ))}
@@ -1365,7 +1375,6 @@ function DesktopChatOverlay({ messages }) {
         padding: '12px 10px',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'flex-end',
         gap: 7,
         zIndex: 20,
         pointerEvents: 'none',
@@ -1374,6 +1383,8 @@ function DesktopChatOverlay({ messages }) {
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
       }}
     >
+      {/* FIX: spacer pushes messages to bottom when few; allows scroll when many */}
+      <div style={{ flex: 1, minHeight: 0 }} />
       {messages.slice(-20).map((m) => (
         <MessageBubble key={m.id} msg={m} compact={false} />
       ))}
@@ -1393,7 +1404,7 @@ function MessageBubble({ msg, compact }) {
     wordBreak: 'break-word',
     fontFamily: '"DM Sans", sans-serif',
     backdropFilter: 'blur(4px)',
-WebkitBackdropFilter: 'blur(4px)',
+    WebkitBackdropFilter: 'blur(4px)',
     animation: 'fadeSlide 0.2s ease-out',
     pointerEvents: 'auto',
   };
@@ -1421,11 +1432,10 @@ WebkitBackdropFilter: 'blur(4px)',
       <div style={{
         ...base,
         alignSelf: 'flex-start',
-      background: '#D4AF37',
-color: '#000',
-fontWeight: 600,
+        background: '#D4AF37',
+        color: '#000',
+        fontWeight: 600,
         border: '1px solid rgba(212,175,55,0.35)',
-      
         borderRadius: '14px 14px 4px 14px',
         textShadow: '0 1px 3px rgba(0,0,0,0.5)',
       }}>
@@ -1438,10 +1448,9 @@ fontWeight: 600,
     <div style={{
       ...base,
       alignSelf: 'flex-start',
-     background: 'rgba(0,0,0,0.6)',
-color: '#fff',
+      background: 'rgba(0,0,0,0.6)',
+      color: '#fff',
       border: '1px solid rgba(255,255,255,0.12)',
-      
       borderRadius: '14px 14px 14px 4px',
       textShadow: '0 1px 3px rgba(0,0,0,0.6)',
     }}>
