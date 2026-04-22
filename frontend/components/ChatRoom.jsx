@@ -873,25 +873,7 @@ export default function ChatRoom() {
                   imageRendering: 'auto'
                 }}
               />
-              {/* "Stranger" label */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 10,
-                  left: 12,
-                  padding: '4px 10px',
-                  borderRadius: 20,
-                  background: 'rgba(10,10,10,0.6)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(212,175,55,0.2)',
-                  color: 'rgba(212,175,55,0.8)',
-                  fontSize: 11,
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                }}
-              >
-                STRANGER
-              </div>
+             
               {/* Placeholder when no stream */}
               {status !== 'connected' && (
                 <div
@@ -930,25 +912,7 @@ export default function ChatRoom() {
                   filter: isVideoOff ? 'brightness(0)' : 'none',
                 }}
               />
-              {/* "You" label */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 10,
-                  left: 12,
-                  padding: '4px 10px',
-                  borderRadius: 20,
-                  background: 'rgba(10,10,10,0.6)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(212,175,55,0.2)',
-                  color: 'rgba(212,175,55,0.8)',
-                  fontSize: 11,
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                }}
-              >
-                YOU
-              </div>
+            
               {isVideoOff && (
                 <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
                   <span style={{ fontSize: 36, opacity: 0.3 }}>🎥</span>
