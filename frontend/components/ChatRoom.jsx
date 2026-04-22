@@ -277,6 +277,8 @@ function ReportModal({ onClose, onSubmit }) {
 
 /* ── Main ChatRoom ────────────────────────────────────────────────────── */
 export default function ChatRoom() {
+  const [isTyping, setIsTyping] = useState(false);
+  
   const router = useRouter();
 
   // ── State ──────────────────────────────────────────────────────────
@@ -291,6 +293,7 @@ export default function ChatRoom() {
   const [isMobile, setIsMobile] = useState(false);
   const [mediaReady, setMediaReady] = useState(false);
   const [mediaError, setMediaError] = useState('');
+  
 
   // ── Refs ───────────────────────────────────────────────────────────
   const socketRef = useRef(null);
@@ -1184,6 +1187,16 @@ const handleNext = () => {
           <Icons.Send />
         </button>
       </div>
+      {isTyping && (
+  <div style={{
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.6)',
+    fontStyle: 'italic',
+    marginTop: 5
+  }}>
+    Stranger is typing...
+  </div>
+)}
 
       {/* ── Report modal ─────────────────────────────────────────────── */}
       {showReport && (

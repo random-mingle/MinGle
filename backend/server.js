@@ -45,6 +45,12 @@ function broadcastOnlineCount() {
 io.on('connection', (socket) => {
   console.log(`[+] Connected: ${socket.id}  (total: ${io.engine.clientsCount})`);
   broadcastOnlineCount();
+  socket.on('typing', () => {
+  const partnerId = activePairs.get(socket.id);
+  if (partnerId) {
+    io.to(partnerId).emit('typing');
+  }
+});
 
   // ── Find Match ──────────────────────────────────────────────────────
   socket.on('find_match', () => {
