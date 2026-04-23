@@ -1323,26 +1323,26 @@ function MobileChatOverlay({ messages }) {
           height: '100%',
           overflowY: 'auto',
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: 'column',   // ✅ vertical
 
-          direction: 'rtl', // 🔥 ADD THIS
+          alignItems: 'flex-start',  // ✅ left
 
-          alignItems: 'flex-start',
           width: '100%',
           maxWidth: '260px',
+
           gap: 6,
           padding: '10px 8px 12px',
           pointerEvents: 'auto',
+
+          scrollbarWidth: 'none',   // ✅ hide scrollbar
+          msOverflowStyle: 'none',
         }}
       >
         <div style={{ flex: '1 0 0' }} />
 
-        {/* 🔥 wrap messages */}
-        <div style={{ direction: 'ltr', width: '100%' }}>
-          {messages.slice(-20).map((m) => (
-            <MessageBubble key={m.id} msg={m} compact />
-          ))}
-        </div>
+        {messages.slice(-20).map((m) => (
+          <MessageBubble key={m.id} msg={m} compact />
+        ))}
 
         <div ref={endRef} />
       </div>
@@ -1378,6 +1378,9 @@ function DesktopChatOverlay({ messages }) {
           flexDirection: 'column',
           gap: 7,
           padding: '12px 10px 80px',
+
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
         }}
       >
         <div style={{ flex: '1 0 0' }} />
@@ -1391,6 +1394,7 @@ function DesktopChatOverlay({ messages }) {
     </div>
   );
 }
+
 function MessageBubble({ msg, compact }) {
   const base = {
     padding: compact ? '6px 10px' : '8px 12px',
