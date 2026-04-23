@@ -797,7 +797,7 @@ export default function ChatRoom() {
         left: '50%',
         transform: 'translate(-50%, -50%)',
         zIndex: 999,
-        pointerEvents: 'none',
+        pointerEvents: 'auto',
       }}
     >
       {/* Desktop logo */}
@@ -1283,7 +1283,7 @@ function MobileChatOverlay({ messages }) {
         zIndex: 20,
         pointerEvents: 'auto',
         overflowY: 'auto',
-        paddingBottom: '90px',
+        paddingBottom: '100px',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
       }}
@@ -1319,7 +1319,7 @@ function DesktopChatOverlay({ messages }) {
         zIndex: 20,
         pointerEvents: 'auto',
         overflowY: 'auto',
-        paddingBottom: '90px',
+        paddingBottom: '100px',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
       }}
