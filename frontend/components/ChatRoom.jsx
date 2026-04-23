@@ -1325,6 +1325,8 @@ function MobileChatOverlay({ messages }) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start', // ✅ LEFT
+          width: '100%',
+          maxWidth: '260px', 
           gap: 6,
           padding: '10px 8px 12px',
           pointerEvents: 'auto',
@@ -1393,7 +1395,7 @@ function MessageBubble({ msg, compact }) {
     lineHeight: 1.4,
 
     maxWidth: '75%',          // ✅ FIX
-    width: 'fit-content',     // ✅ FIX
+   display: 'inline-block',   // ✅ FIX
 
     overflowWrap: 'break-word', // ✅ FIX
     whiteSpace: 'pre-wrap',
