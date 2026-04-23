@@ -922,7 +922,7 @@ export default function ChatRoom() {
             </div>
 
             {/* Chat overlay — left side, over both videos */}
-            // <MobileChatOverlay messages={messages} />
+            {/* <MobileChatOverlay messages={messages} /> */}
 
             {/* Right-side control buttons — floating over videos */}
             <div
@@ -1214,6 +1214,7 @@ export default function ChatRoom() {
             transform: 'translateX(-50%)',
             background: 'rgba(212,175,55,0.15)',
             border: '1px solid rgba(212,175,55,0.4)',
+            borderTop: '1px solid rgba(212,175,55,0.12)',
             color: '#D4AF37',
             padding: '10px 24px',
             borderRadius: 50,
