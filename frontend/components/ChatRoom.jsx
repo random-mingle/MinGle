@@ -565,7 +565,11 @@ export default function ChatRoom() {
 
   /* ── Controls ───────────────────────────────────────────────────── */
   const handleStart = () => {
-    if (!mediaReady && !mediaError) return;
+    // FIX: Removed the early-return guard that silently blocked clicks on mobile.
+    // Previously: if (!mediaReady && !mediaError) return
+    // Problem: on Android/iPhone the camera permission dialog is async —
+    // user clicks START before mediaReady=true, nothing happened with zero feedback.
+    // createPC already null-checks localStreamRef so missing media is safe.
     socketRef.current?.emit('find_match');
     setMessages([]);
     setStatus('waiting');
@@ -677,7 +681,7 @@ export default function ChatRoom() {
     <div
       style={{
         width: '100%',
-        height: '100vh',
+        height: '100dvh',
         background: '#0A0A0A',
         display: 'flex',
         flexDirection: 'column',
@@ -1103,9 +1107,12 @@ export default function ChatRoom() {
                   fontSize: 16,
                   boxShadow: '0 0 30px rgba(212,175,55,0.5)',
                   letterSpacing: '0.18em',
+                  // FIX: visually indicate loading state — never silently unresponsive
+                  opacity: mediaReady ? 1 : 0.75,
+                  cursor: 'pointer',
                 }}
               >
-                ✦ START ✦
+                {mediaReady ? '✦ START ✦' : '⏳ Starting…'}
               </button>
             )}
             {mediaError && (
@@ -1131,7 +1138,7 @@ export default function ChatRoom() {
 
       {/* ── Chat input bar + typing indicator (FIX: wrapped together so typing shows above input) ── */}
       <div style={{
- position: 'relative',
+  position: 'fixed',
   bottom: 0,
   left: 0,
   width: '100%',
@@ -1294,7 +1301,7 @@ function MobileChatOverlay({ messages }) {
         position: 'absolute',
         left: 0,
         top: 60,
-        bottom: 100,          /* FIX: leaves room above fixed input bar */
+        bottom: 70,          /* FIX: leaves room above fixed input bar */
         width: '72%',
         maxWidth: 280,
         zIndex: 999,
@@ -1318,7 +1325,7 @@ function MobileChatOverlay({ messages }) {
       >
         {/* Spacer: flex-shrink:0 keeps push-to-bottom working even when messages overflow */}
         <div style={{ flex: '1 0 0' }} />
-        {messages.slice(-50).map((m) => (
+        {messages.slice(-20).map((m) => (
           <MessageBubble key={m.id} msg={m} compact />
         ))}
         <div ref={endRef} />
@@ -1368,7 +1375,7 @@ function DesktopChatOverlay({ messages }) {
         }}
       >
         <div style={{ flex: '1 0 0' }} />
-        {messages.slice(-50).map((m) => (
+        {messages.slice(-20).map((m) => (
           <MessageBubble key={m.id} msg={m} compact={false} />
         ))}
         <div ref={endRef} />
