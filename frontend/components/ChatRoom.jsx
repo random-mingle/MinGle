@@ -1323,7 +1323,7 @@ function MobileChatOverlay({ messages }) {
         bottom: 70,          /* FIX: leaves room above fixed input bar */
        width: '100%',
 maxWidth: '100%',
-alignItems: 'flex-start',
+
         zIndex: 999,
         pointerEvents: 'none',   /* FIX: outer is transparent to touches */
         overflow: 'hidden',
@@ -1334,6 +1334,7 @@ alignItems: 'flex-start',
         style={{
           height: '100%',
           overflowY: 'auto',
+          direction: 'rtl',
           display: 'flex',
           flexDirection: 'column',
           gap: 6,
@@ -1343,10 +1344,13 @@ alignItems: 'flex-start',
         }}
       >
         {/* Spacer: flex-shrink:0 keeps push-to-bottom working even when messages overflow */}
-       
-        {messages.slice(-20).map((m) => (
-          <MessageBubble key={m.id} msg={m} compact />
-        ))}
+       <div style={{ flex: '1 0 0' }} />
+
+       <div style={{ direction: 'ltr' }}>
+  {messages.slice(-20).map((m) => (
+    <MessageBubble key={m.id} msg={m} compact />
+  ))}
+</div>
         <div ref={endRef} />
       </div>
     </div>
@@ -1372,8 +1376,9 @@ function DesktopChatOverlay({ messages }) {
         left: 0,
         bottom: 0,
         top: 60,
-       left: 0,
-width: '300px',
+       
+width: '100%',
+maxWidth: '320px',
 
         zIndex: 20,
         pointerEvents: 'auto',
@@ -1385,6 +1390,7 @@ width: '300px',
         style={{
           height: '100%',
           overflowY: 'auto',
+          direction: 'rtl',
           display: 'flex',
           flexDirection: 'column',
           gap: 7,
@@ -1393,12 +1399,18 @@ width: '300px',
           WebkitOverflowScrolling: 'touch',  /* FIX: iOS momentum scrolling */
         }}
       >
-        <div style={{ flex: '1 0 0' }} />
-        {messages.slice(-20).map((m) => (
-          <MessageBubble key={m.id} msg={m} compact={false} />
-        ))}
-        <div ref={endRef} />
-      </div>
+
+     {/* ✅ MUST */}
+  <div style={{ flex: '1 0 0' }} />
+
+  <div style={{ direction: 'ltr' }}>
+    {messages.slice(-20).map((m) => (
+      <MessageBubble key={m.id} msg={m} compact={false} />
+    ))}
+  </div>
+
+  <div ref={endRef} />
+</div>
     </div>
   );
 }
