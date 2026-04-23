@@ -780,9 +780,7 @@ export default function ChatRoom() {
             />
             <div style={{ position: 'absolute', inset: 1, borderRadius: '50%', background: '#22c55e' }} />
           </div>
-          <span style={{ color: 'rgba(255,255,255,0.55)', fontFamily: '"DM Sans", sans-serif' }}>
-            {onlineCount > 0 ? `${onlineCount.toLocaleString()} online` : 'Online'}
-          </span>
+         
         </div>
       </div>
 
