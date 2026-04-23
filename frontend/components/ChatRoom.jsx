@@ -276,6 +276,20 @@ function ReportModal({ onClose, onSubmit }) {
 }
 
 /* ── Main ChatRoom ────────────────────────────────────────────────────── */
+useEffect(() => {
+  const setVH = () => {
+    document.documentElement.style.setProperty(
+      '--vh',
+      `${window.innerHeight * 0.01}px`
+    );
+  };
+
+  setVH();
+  window.addEventListener('resize', setVH);
+
+  return () => window.removeEventListener('resize', setVH);
+}, []);
+
 export default function ChatRoom() {
   const [isTyping, setIsTyping] = useState(false);
 
@@ -681,7 +695,7 @@ export default function ChatRoom() {
     <div
       style={{
         width: '100%',
-        height: '100dvh',
+        height: 'calc(var(--vh) * 100)',
         background: '#0A0A0A',
         display: 'flex',
         flexDirection: 'column',
