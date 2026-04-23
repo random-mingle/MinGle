@@ -1321,9 +1321,8 @@ function MobileChatOverlay({ messages }) {
         left: 0,
         top: 60,
         bottom: 70,          /* FIX: leaves room above fixed input bar */
-       width: '100%',
-maxWidth: '100%',
-
+        width: '100%',
+        maxWidth: '100%',
         zIndex: 999,
         pointerEvents: 'none',   /* FIX: outer is transparent to touches */
         overflow: 'hidden',
@@ -1337,6 +1336,7 @@ maxWidth: '100%',
           direction: 'rtl',
           display: 'flex',
           flexDirection: 'column',
+           alignItems: 'flex-start',
           gap: 6,
           padding: '10px 8px 12px',
           pointerEvents: 'auto',   /* FIX: re-enable touches only on scroll area */
