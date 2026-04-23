@@ -1298,151 +1298,120 @@ willChange: 'transform',
   );
 }
 
-/* ── Mobile chat overlay (floats over videos, left side) ─────────────── */
 function MobileChatOverlay({ messages }) {
   const endRef = useRef(null);
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   return (
-    /*
-     * FIX #3 + #6: Two-div pattern:
-     *   OUTER — handles absolute positioning, masking, and overflow:hidden clip.
-     *           bottom:70px clears the fixed input bar (~60px) so messages
-     *           never hide behind it. pointerEvents:none so the transparent
-     *           area doesn't eat touch events meant for control buttons.
-     *   INNER — owns the actual overflowY:auto scroll, touch momentum, and
-     *           flex layout. pointerEvents:auto re-enables interaction here.
-     *   SPACER — flex:'1 0 0' (flex-shrink:0 !) so it never collapses when
-     *           messages overflow, keeping the push-to-bottom effect intact.
-     */
     <div
       style={{
         position: 'absolute',
         left: 0,
         top: 60,
-        bottom: 70,          /* FIX: leaves room above fixed input bar */
+        bottom: 70,
         width: '100%',
-        maxWidth: '100%',
         zIndex: 999,
-        pointerEvents: 'none',   /* FIX: outer is transparent to touches */
+        pointerEvents: 'none',
         overflow: 'hidden',
-       
       }}
     >
       <div
         style={{
           height: '100%',
           overflowY: 'auto',
-          direction: 'rtl',
           display: 'flex',
           flexDirection: 'column',
-           alignItems: 'flex-start',
+          alignItems: 'flex-start', // ✅ LEFT
           gap: 6,
           padding: '10px 8px 12px',
-          pointerEvents: 'auto',   /* FIX: re-enable touches only on scroll area */
-          WebkitOverflowScrolling: 'touch',  /* FIX: iOS momentum scrolling */
+          pointerEvents: 'auto',
         }}
       >
-        {/* Spacer: flex-shrink:0 keeps push-to-bottom working even when messages overflow */}
-       <div style={{ flex: '1 0 0' }} />
+        {/* Spacer */}
+        <div style={{ flex: '1 0 0' }} />
 
-       <div style={{ direction: 'ltr' }}>
-  {messages.slice(-20).map((m) => (
-    <MessageBubble key={m.id} msg={m} compact />
-  ))}
-</div>
+        {/* Messages */}
+        {messages.slice(-20).map((m) => (
+          <MessageBubble key={m.id} msg={m} compact />
+        ))}
+
         <div ref={endRef} />
       </div>
     </div>
   );
 }
 
-/* ── Desktop chat overlay (floats over stranger video) ───────────────── */
 function DesktopChatOverlay({ messages }) {
   const endRef = useRef(null);
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   return (
-    /*
-     * FIX #4: Same two-div pattern as mobile.
-     * bottom:0 is correct here — the parent panel has overflow:hidden which
-     * clips the overlay at the panel boundary. paddingBottom:80px in the
-     * inner scroll div creates dead-scroll space so the last message appears
-     * above the fixed input bar (the panel itself extends behind it).
-     */
     <div
       style={{
         position: 'absolute',
         left: 0,
         bottom: 0,
         top: 60,
-       
-width: '100%',
-maxWidth: '320px',
-
+        width: '100%',
+        maxWidth: '320px',
         zIndex: 20,
-        pointerEvents: 'auto',
         overflow: 'hidden',
-        background: 'transparent',
       }}
     >
       <div
         style={{
           height: '100%',
           overflowY: 'auto',
-          direction: 'rtl',
           display: 'flex',
           flexDirection: 'column',
           gap: 7,
-          padding: '12px 10px 80px',   /* paddingBottom clears fixed input bar */
-         
-          WebkitOverflowScrolling: 'touch',  /* FIX: iOS momentum scrolling */
+          padding: '12px 10px 80px',
         }}
       >
+        <div style={{ flex: '1 0 0' }} />
 
-     {/* ✅ MUST */}
-  <div style={{ flex: '1 0 0' }} />
+        {messages.slice(-20).map((m) => (
+          <MessageBubble key={m.id} msg={m} />
+        ))}
 
-  <div style={{ direction: 'ltr' }}>
-    {messages.slice(-20).map((m) => (
-      <MessageBubble key={m.id} msg={m} compact={false} />
-    ))}
-  </div>
-
-  <div ref={endRef} />
-</div>
+        <div ref={endRef} />
+      </div>
     </div>
   );
 }
-
-/* ── Message bubble ──────────────────────────────────────────────────── */
 function MessageBubble({ msg, compact }) {
   const base = {
     padding: compact ? '6px 10px' : '8px 12px',
     borderRadius: 12,
     fontSize: compact ? 12 : 13,
     lineHeight: 1.4,
-    maxWidth: '75%',
-     width: 'fit-content', 
-    wordBreak: 'break-word',
+
+    maxWidth: '75%',          // ✅ FIX
+    width: 'fit-content',     // ✅ FIX
+
+    overflowWrap: 'break-word', // ✅ FIX
+    whiteSpace: 'pre-wrap',
+
     fontFamily: '"DM Sans", sans-serif',
     backdropFilter: 'blur(4px)',
-    WebkitBackdropFilter: 'blur(4px)',
-    animation: 'fadeSlide 0.2s ease-out',
-    pointerEvents: 'auto',
   };
 
+  // SYSTEM
   if (msg.from === 'system') {
     return (
       <div style={{
         ...base,
         alignSelf: 'center',
         background: 'rgba(212,175,55,0.08)',
-        border: '1px solid rgba(212,175,55,0.2)',
-        color: 'rgba(212,175,55,0.7)',
+        color: '#D4AF37',
         fontStyle: 'italic',
         fontSize: compact ? 11 : 12,
-        textAlign: 'center',
         borderRadius: 20,
       }}>
         {msg.text}
@@ -1450,36 +1419,31 @@ function MessageBubble({ msg, compact }) {
     );
   }
 
+  // YOU (LEFT)
   if (msg.from === 'me') {
     return (
-    <div style={{
-  ...base,
-  alignSelf: 'flex-start',
-  background: '#D4AF37',
-  color: '#000',
-  fontWeight: 600,
-  border: '1px solid rgba(212,175,55,0.35)',
-  borderRadius: '14px 14px 4px 14px',
-  textShadow: '0 1px 3px rgba(0,0,0,0.5)',
-}}>
+      <div style={{
+        ...base,
+        alignSelf: 'flex-start', // ✅ LEFT
+        background: '#D4AF37',
+        color: '#000',
+        fontWeight: 600,
+        borderRadius: '14px',
+      }}>
         {msg.text}
       </div>
     );
   }
 
+  // STRANGER (LEFT)
   return (
     <div style={{
       ...base,
-     alignSelf: 'flex-start' ,
+      alignSelf: 'flex-start', // ✅ LEFT
       background: 'rgba(0,0,0,0.6)',
       color: '#fff',
-      border: '1px solid rgba(255,255,255,0.12)',
-      borderRadius: '14px 14px 14px 4px',
-      textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+      borderRadius: '14px',
     }}>
-      <span style={{ color: 'rgba(212,175,55,0.7)', fontSize: 10, fontWeight: 600, display: 'block', marginBottom: 2 }}>
-        STRANGER
-      </span>
       {msg.text}
     </div>
   );
