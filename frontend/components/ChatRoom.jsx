@@ -1363,10 +1363,9 @@ function DesktopChatOverlay({ messages }) {
         width: '65%',
         maxWidth: 340,
         zIndex: 20,
-        pointerEvents: 'none',
+        pointerEvents: 'auto',
         overflow: 'hidden',
-        maskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
-        WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
+        background: 'transparent',
       }}
     >
       <div
