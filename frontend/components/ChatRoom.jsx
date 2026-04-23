@@ -1124,7 +1124,14 @@ export default function ChatRoom() {
       </div>
 
       {/* ── Chat input bar + typing indicator (FIX: wrapped together so typing shows above input) ── */}
-      <div style={{ flexShrink: 0 }}>
+      <div style={{
+  position: 'fixed',
+  bottom: 0,
+  left: 0,
+  width: '100%',
+  zIndex: 999,
+  background: 'rgba(10,10,10,0.95)'
+}}>
         {isTyping && (
           <div style={{
             fontSize: 12,
@@ -1161,7 +1168,7 @@ export default function ChatRoom() {
             onKeyDown={handleKeyDown}
             placeholder={
               status === 'connected'
-                ? 'Type a message… (Enter to send)'
+                ? 'Type a message… '
                 : 'Connect to start chatting'
             }
             disabled={status !== 'connected'}
@@ -1276,6 +1283,7 @@ function MobileChatOverlay({ messages }) {
         zIndex: 20,
         pointerEvents: 'none',
         overflowY: 'auto',
+        paddingBottom: '90px',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
       }}
@@ -1311,6 +1319,7 @@ function DesktopChatOverlay({ messages }) {
         zIndex: 20,
         pointerEvents: 'none',
         overflowY: 'auto',
+        paddingBottom: '90px',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
       }}
