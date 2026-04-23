@@ -846,7 +846,7 @@ export default function ChatRoom() {
   
         {/* ── MOBILE layout ────────────────────────────────────────── */}
         {isMobile ? (
-          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+          <div style={{ width: '100%', height: '100dvh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
 
             {/* Top half: Stranger video */}
             <div
@@ -1281,7 +1281,7 @@ function MobileChatOverlay({ messages }) {
         flexDirection: 'column',
         gap: 6,
         zIndex: 20,
-        pointerEvents: 'none',
+        pointerEvents: 'auto',
         overflowY: 'auto',
         paddingBottom: '90px',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
@@ -1317,7 +1317,7 @@ function DesktopChatOverlay({ messages }) {
         flexDirection: 'column',
         gap: 7,
         zIndex: 20,
-        pointerEvents: 'none',
+        pointerEvents: 'auto',
         overflowY: 'auto',
         paddingBottom: '90px',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
