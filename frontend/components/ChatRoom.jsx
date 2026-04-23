@@ -116,7 +116,7 @@ function WaitingOverlay({ onCancel }) {
             animation: 'spin 3s linear infinite reverse',
           }}
         />
-        <span style={{ fontSize: 32, filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.8))' }}>♛</span>
+        
       </div>
 
       <div style={{ textAlign: 'center' }}>
@@ -719,7 +719,7 @@ export default function ChatRoom() {
           }}
           title="Back to home"
         >
-          <span style={{ fontSize: 20, filter: 'drop-shadow(0 0 6px rgba(212,175,55,0.7))' }}>♛</span>
+         
           <span
             style={{
               fontFamily: '"Playfair Display", serif',
@@ -1067,7 +1067,7 @@ export default function ChatRoom() {
               gap: 20,
             }}
           >
-            <span style={{ fontSize: 56, filter: 'drop-shadow(0 0 20px rgba(212,175,55,0.7))' }}>♛</span>
+           
             <div style={{ textAlign: 'center' }}>
               <p
                 style={{
