@@ -961,7 +961,13 @@ export default function ChatRoom() {
 
         ) : (
           /* ── DESKTOP layout ──────────────────────────────────────── */
-          <div style={{ width: '100%', height: '100%', display: 'flex', position: 'relative' }}>
+          <div style={{
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  position: 'relative',
+  overflow: 'hidden'   // 🔥 add this line
+}}>
 
             {/* Left video: Stranger */}
             <div
@@ -969,7 +975,7 @@ export default function ChatRoom() {
                 flex: 1,
                 position: 'relative',
                 background: '#111',
-                borderRight: '1px solid rgba(212,175,55,0.1)',
+                borderRight: 'none',
                 overflow: 'hidden',
               }}
             >
@@ -1371,7 +1377,7 @@ function DesktopChatOverlay({ messages }) {
           flexDirection: 'column',
           gap: 7,
           padding: '12px 10px 80px',   /* paddingBottom clears fixed input bar */
-          pointerEvents: 'auto',
+         
           WebkitOverflowScrolling: 'touch',  /* FIX: iOS momentum scrolling */
         }}
       >
@@ -1423,7 +1429,7 @@ function MessageBubble({ msg, compact }) {
     return (
       <div style={{
         ...base,
-        alignSelf: 'flex-end',     /* FIX #2: was flex-start — "me" bubbles must be RIGHT-aligned */
+        alignSelf: 'flex-start',     /* FIX #2: was flex-start — "me" bubbles must be RIGHT-aligned */
         background: '#D4AF37',
         color: '#000',
         fontWeight: 600,
