@@ -1422,7 +1422,8 @@ function MessageBubble({ msg, compact }) {
     borderRadius: 12,
     fontSize: compact ? 12 : 13,
     lineHeight: 1.4,
-    maxWidth: '40%',
+    maxWidth: '75%',
+     width: 'fit-content', 
     wordBreak: 'break-word',
     fontFamily: '"DM Sans", sans-serif',
     backdropFilter: 'blur(4px)',
@@ -1469,7 +1470,7 @@ function MessageBubble({ msg, compact }) {
   return (
     <div style={{
       ...base,
-     alignSelf: 'flex-end' ,
+     alignSelf: 'flex-start' ,
       background: 'rgba(0,0,0,0.6)',
       color: '#fff',
       border: '1px solid rgba(255,255,255,0.12)',
