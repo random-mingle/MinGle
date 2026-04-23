@@ -276,7 +276,10 @@ function ReportModal({ onClose, onSubmit }) {
 }
 
 /* ── Main ChatRoom ────────────────────────────────────────────────────── */
-useEffect(() => {
+
+
+export default function ChatRoom() {
+  useEffect(() => {
   if (typeof window === 'undefined') return;
 
   const setVH = () => {
@@ -292,7 +295,6 @@ useEffect(() => {
   return () => window.removeEventListener('resize', setVH);
 }, []);
 
-export default function ChatRoom() {
   const [isTyping, setIsTyping] = useState(false);
 
   const router = useRouter();
