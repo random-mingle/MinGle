@@ -1324,21 +1324,25 @@ function MobileChatOverlay({ messages }) {
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'flex-start', // ✅ LEFT
+
+          direction: 'rtl', // 🔥 ADD THIS
+
+          alignItems: 'flex-start',
           width: '100%',
-          maxWidth: '260px', 
+          maxWidth: '260px',
           gap: 6,
           padding: '10px 8px 12px',
           pointerEvents: 'auto',
         }}
       >
-        {/* Spacer */}
         <div style={{ flex: '1 0 0' }} />
 
-        {/* Messages */}
-        {messages.slice(-20).map((m) => (
-          <MessageBubble key={m.id} msg={m} compact />
-        ))}
+        {/* 🔥 wrap messages */}
+        <div style={{ direction: 'ltr', width: '100%' }}>
+          {messages.slice(-20).map((m) => (
+            <MessageBubble key={m.id} msg={m} compact />
+          ))}
+        </div>
 
         <div ref={endRef} />
       </div>
