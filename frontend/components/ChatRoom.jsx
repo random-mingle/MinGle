@@ -1141,7 +1141,7 @@ export default function ChatRoom() {
           style={{
             padding: '10px 12px',
             background: 'rgba(10,10,10,0.95)',
-            borderTop: '1px solid rgba(212,175,55,0.12)',
+          
             display: 'flex',
             gap: 8,
             alignItems: 'center',
