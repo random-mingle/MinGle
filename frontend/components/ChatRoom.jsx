@@ -846,8 +846,14 @@ export default function ChatRoom() {
   
         {/* ── MOBILE layout ────────────────────────────────────────── */}
         {isMobile ? (
-          <div style={{ width: '100%', height: '100dvh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-
+          <div style={{
+  width: '100%',
+  height: '100vh',
+  display: 'flex',
+  flexDirection: 'column',
+  position: 'relative',
+  overflow: 'hidden'   // 🔥 add this
+}}>
             {/* Top half: Stranger video */}
             <div
               style={{
@@ -920,7 +926,7 @@ export default function ChatRoom() {
             </div>
 
             {/* Chat overlay — left side, over both videos */}
-            {/* <MobileChatOverlay messages={messages} /> */}
+           
 
             {/* Right-side control buttons — floating over videos */}
             <div
@@ -1280,7 +1286,7 @@ function MobileChatOverlay({ messages }) {
         display: 'flex',
         flexDirection: 'column',
         gap: 6,
-        zIndex: 20,
+        zIndex: 999,
         pointerEvents: 'auto',
         overflowY: 'auto',
         paddingBottom: '100px',
@@ -1372,7 +1378,7 @@ function MessageBubble({ msg, compact }) {
     return (
       <div style={{
         ...base,
-        alignSelf: 'flex-start',
+         alignSelf: 'flex-end',
         background: '#D4AF37',
         color: '#000',
         fontWeight: 600,
