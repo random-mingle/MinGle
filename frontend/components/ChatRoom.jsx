@@ -677,7 +677,7 @@ export default function ChatRoom() {
     <div
       style={{
         width: '100%',
-        height: '100dvh',
+        height: '100vh',
         background: '#0A0A0A',
         display: 'flex',
         flexDirection: 'column',
@@ -848,11 +848,11 @@ export default function ChatRoom() {
         {isMobile ? (
           <div style={{
   width: '100%',
-  height: '100dvh',
+  height: '100%',        /* FIX #1: was 100dvh — caused double-height inside flex:1 parent */
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
-  overflow: 'hidden'   // 🔥 add this
+  overflow: 'hidden',
 }}>
             {/* Top half: Stranger video */}
             <div
@@ -1131,12 +1131,16 @@ export default function ChatRoom() {
 
       {/* ── Chat input bar + typing indicator (FIX: wrapped together so typing shows above input) ── */}
       <div style={{
-  position: 'fixed',
+ position: 'relative',
   bottom: 0,
   left: 0,
   width: '100%',
   zIndex: 999,
-  background: 'rgba(10,10,10,0.95)'
+  background: 'rgba(10,10,10,0.95)',
+  /* FIX #5: iPhone home-indicator safe area — prevents input bar from
+     sitting on top of system UI on notched/gesture-nav iPhones */
+  paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+  boxSizing: 'border-box',
 }}>
         {isTyping && (
           <div style={{
@@ -1274,32 +1278,51 @@ function MobileChatOverlay({ messages }) {
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   return (
+    /*
+     * FIX #3 + #6: Two-div pattern:
+     *   OUTER — handles absolute positioning, masking, and overflow:hidden clip.
+     *           bottom:70px clears the fixed input bar (~60px) so messages
+     *           never hide behind it. pointerEvents:none so the transparent
+     *           area doesn't eat touch events meant for control buttons.
+     *   INNER — owns the actual overflowY:auto scroll, touch momentum, and
+     *           flex layout. pointerEvents:auto re-enables interaction here.
+     *   SPACER — flex:'1 0 0' (flex-shrink:0 !) so it never collapses when
+     *           messages overflow, keeping the push-to-bottom effect intact.
+     */
     <div
       style={{
         position: 'absolute',
         left: 0,
         top: 60,
-        bottom: 0,
+        bottom: 100,          /* FIX: leaves room above fixed input bar */
         width: '72%',
         maxWidth: 280,
-        padding: '10px 8px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
         zIndex: 999,
-        pointerEvents: 'auto',
-        overflowY: 'auto',
-        paddingBottom: '90px',
+        pointerEvents: 'none',   /* FIX: outer is transparent to touches */
+        overflow: 'hidden',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
       }}
     >
-      {/* FIX: spacer pushes messages to bottom when few; allows scroll when many */}
-      <div style={{ flex: 1, minHeight: 0 }} />
-      {messages.slice(-20).map((m) => (
-        <MessageBubble key={m.id} msg={m} compact />
-      ))}
-      <div ref={endRef} />
+      <div
+        style={{
+          height: '100%',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 6,
+          padding: '10px 8px 12px',
+          pointerEvents: 'auto',   /* FIX: re-enable touches only on scroll area */
+          WebkitOverflowScrolling: 'touch',  /* FIX: iOS momentum scrolling */
+        }}
+      >
+        {/* Spacer: flex-shrink:0 keeps push-to-bottom working even when messages overflow */}
+        <div style={{ flex: '1 0 0' }} />
+        {messages.slice(-50).map((m) => (
+          <MessageBubble key={m.id} msg={m} compact />
+        ))}
+        <div ref={endRef} />
+      </div>
     </div>
   );
 }
@@ -1310,6 +1333,13 @@ function DesktopChatOverlay({ messages }) {
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   return (
+    /*
+     * FIX #4: Same two-div pattern as mobile.
+     * bottom:0 is correct here — the parent panel has overflow:hidden which
+     * clips the overlay at the panel boundary. paddingBottom:80px in the
+     * inner scroll div creates dead-scroll space so the last message appears
+     * above the fixed input bar (the panel itself extends behind it).
+     */
     <div
       style={{
         position: 'absolute',
@@ -1318,24 +1348,31 @@ function DesktopChatOverlay({ messages }) {
         top: 60,
         width: '65%',
         maxWidth: 340,
-        padding: '12px 10px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 7,
         zIndex: 20,
-        pointerEvents: 'auto',
-        overflowY: 'auto',
-        paddingBottom: '90px',
+        pointerEvents: 'none',
+        overflow: 'hidden',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
       }}
     >
-      {/* FIX: spacer pushes messages to bottom when few; allows scroll when many */}
-      <div style={{ flex: 1, minHeight: 0 }} />
-      {messages.slice(-20).map((m) => (
-        <MessageBubble key={m.id} msg={m} compact={false} />
-      ))}
-      <div ref={endRef} />
+      <div
+        style={{
+          height: '100%',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 7,
+          padding: '12px 10px 80px',   /* paddingBottom clears fixed input bar */
+          pointerEvents: 'auto',
+          WebkitOverflowScrolling: 'touch',  /* FIX: iOS momentum scrolling */
+        }}
+      >
+        <div style={{ flex: '1 0 0' }} />
+        {messages.slice(-50).map((m) => (
+          <MessageBubble key={m.id} msg={m} compact={false} />
+        ))}
+        <div ref={endRef} />
+      </div>
     </div>
   );
 }
@@ -1378,7 +1415,7 @@ function MessageBubble({ msg, compact }) {
     return (
       <div style={{
         ...base,
-        alignSelf: 'flex-start',
+        alignSelf: 'flex-end',     /* FIX #2: was flex-start — "me" bubbles must be RIGHT-aligned */
         background: '#D4AF37',
         color: '#000',
         fontWeight: 600,
