@@ -981,6 +981,7 @@ WebkitBackfaceVisibility: 'hidden',
                 background: '#111',
                 borderRight: 'none',
                 overflow: 'hidden',
+                marginRight: '-1px',
               }}
             >
               <video
@@ -995,6 +996,7 @@ WebkitBackfaceVisibility: 'hidden',
                   transform: 'scaleX(-1) translateZ(0)',
 backfaceVisibility: 'hidden',
 WebkitBackfaceVisibility: 'hidden',
+  willChange: 'transform',
                 }}
               />
             
@@ -1018,6 +1020,7 @@ WebkitBackfaceVisibility: 'hidden',
                 position: 'relative',
                 background: '#0e0e0e',
                 overflow: 'hidden',
+                marginLeft: '-1px',
               }}
             >
               <video
@@ -1034,6 +1037,7 @@ WebkitBackfaceVisibility: 'hidden',
                 transform: 'scaleX(-1) translateZ(0)',
 backfaceVisibility: 'hidden',
 WebkitBackfaceVisibility: 'hidden',
+willChange: 'transform',
                   filter: isVideoOff ? 'brightness(0)' : 'none',
                 }}
               />
@@ -1317,13 +1321,13 @@ function MobileChatOverlay({ messages }) {
         left: 0,
         top: 60,
         bottom: 70,          /* FIX: leaves room above fixed input bar */
-        width: '72%',
-        maxWidth: 280,
+       width: '100%',
+maxWidth: '100%',
+alignItems: 'flex-start',
         zIndex: 999,
         pointerEvents: 'none',   /* FIX: outer is transparent to touches */
         overflow: 'hidden',
-        maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
-        WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
+       
       }}
     >
       <div
@@ -1339,7 +1343,7 @@ function MobileChatOverlay({ messages }) {
         }}
       >
         {/* Spacer: flex-shrink:0 keeps push-to-bottom working even when messages overflow */}
-        <div style={{ flex: '1 0 0' }} />
+       
         {messages.slice(-20).map((m) => (
           <MessageBubble key={m.id} msg={m} compact />
         ))}
@@ -1369,8 +1373,8 @@ function DesktopChatOverlay({ messages }) {
         bottom: 0,
         top: 60,
        left: 0,
-width: '35%',
-maxWidth: 340,
+width: '300px',
+
         zIndex: 20,
         pointerEvents: 'auto',
         overflow: 'hidden',
