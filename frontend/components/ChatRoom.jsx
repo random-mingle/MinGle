@@ -277,6 +277,8 @@ function ReportModal({ onClose, onSubmit }) {
 
 /* ── Main ChatRoom ────────────────────────────────────────────────────── */
 useEffect(() => {
+  if (typeof window === 'undefined') return;
+
   const setVH = () => {
     document.documentElement.style.setProperty(
       '--vh',
@@ -695,7 +697,7 @@ export default function ChatRoom() {
     <div
       style={{
         width: '100%',
-        height: 'calc(var(--vh) * 100)',
+        height: '100vh',
         background: '#0A0A0A',
         display: 'flex',
         flexDirection: 'column',
