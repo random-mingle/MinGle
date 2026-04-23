@@ -1435,16 +1435,16 @@ function MessageBubble({ msg, compact }) {
 
   if (msg.from === 'me') {
     return (
-      <div style={{
-        ...base,
-        alignSelf: 'flex-end'     /* FIX #2: was flex-start — "me" bubbles must be RIGHT-aligned */
-        background: '#D4AF37',
-        color: '#000',
-        fontWeight: 600,
-        border: '1px solid rgba(212,175,55,0.35)',
-        borderRadius: '14px 14px 4px 14px',
-        textShadow: '0 1px 3px rgba(0,0,0,0.5)',
-      }}>
+    <div style={{
+  ...base,
+  alignSelf: 'flex-end',
+  background: '#D4AF37',
+  color: '#000',
+  fontWeight: 600,
+  border: '1px solid rgba(212,175,55,0.35)',
+  borderRadius: '14px 14px 4px 14px',
+  textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+}}>
         {msg.text}
       </div>
     );
