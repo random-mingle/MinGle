@@ -877,7 +877,9 @@ export default function ChatRoom() {
                   height: '100%',
                   objectFit: 'cover',
                   display: 'block',
-                  transform: 'scaleX(-1)',
+                  transform: 'scaleX(-1) translateZ(0)',
+backfaceVisibility: 'hidden',
+WebkitBackfaceVisibility: 'hidden',
                   imageRendering: 'auto'
                 }}
               />
@@ -916,7 +918,9 @@ export default function ChatRoom() {
                   objectFit: 'cover',
                   backgroundColor: "#000",
                   display: 'block',
-                  transform: 'scaleX(-1)',
+                 transform: 'scaleX(-1) translateZ(0)',
+backfaceVisibility: 'hidden',
+WebkitBackfaceVisibility: 'hidden',
                   filter: isVideoOff ? 'brightness(0)' : 'none',
                 }}
               />
