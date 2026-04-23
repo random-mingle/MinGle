@@ -992,7 +992,9 @@ WebkitBackfaceVisibility: 'hidden',
                   height: '100%',
                   objectFit: 'cover',
                   display: 'block',
-                  transform: 'scaleX(-1)',
+                  transform: 'scaleX(-1) translateZ(0)',
+backfaceVisibility: 'hidden',
+WebkitBackfaceVisibility: 'hidden',
                 }}
               />
             
@@ -1029,7 +1031,9 @@ WebkitBackfaceVisibility: 'hidden',
                   objectFit: 'cover',
                   backgroundColor: "#000",
                   display: 'block',
-                  transform: 'scaleX(-1)',
+                transform: 'scaleX(-1) translateZ(0)',
+backfaceVisibility: 'hidden',
+WebkitBackfaceVisibility: 'hidden',
                   filter: isVideoOff ? 'brightness(0)' : 'none',
                 }}
               />
@@ -1364,8 +1368,8 @@ function DesktopChatOverlay({ messages }) {
         left: 0,
         bottom: 0,
         top: 60,
-       right: '50%',
-width: 'auto',
+       left: 0,
+width: '35%',
 maxWidth: 340,
         zIndex: 20,
         pointerEvents: 'auto',
@@ -1433,7 +1437,7 @@ function MessageBubble({ msg, compact }) {
     return (
       <div style={{
         ...base,
-        alignSelf: 'flex-start',     /* FIX #2: was flex-start — "me" bubbles must be RIGHT-aligned */
+        alignSelf: 'flex-end'     /* FIX #2: was flex-start — "me" bubbles must be RIGHT-aligned */
         background: '#D4AF37',
         color: '#000',
         fontWeight: 600,
