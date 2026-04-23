@@ -1469,7 +1469,7 @@ function MessageBubble({ msg, compact }) {
   return (
     <div style={{
       ...base,
-      alignSelf: 'flex-start',
+     alignSelf: 'flex-end' ,
       background: 'rgba(0,0,0,0.6)',
       color: '#fff',
       border: '1px solid rgba(255,255,255,0.12)',
