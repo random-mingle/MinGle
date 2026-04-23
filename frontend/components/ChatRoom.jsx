@@ -848,7 +848,7 @@ export default function ChatRoom() {
         {isMobile ? (
           <div style={{
   width: '100%',
-  height: '100vh',
+  height: '100dvh',
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
@@ -926,7 +926,7 @@ export default function ChatRoom() {
             </div>
 
             {/* Chat overlay — left side, over both videos */}
-           
+           <MobileChatOverlay messages={messages} />
 
             {/* Right-side control buttons — floating over videos */}
             <div
@@ -1289,7 +1289,7 @@ function MobileChatOverlay({ messages }) {
         zIndex: 999,
         pointerEvents: 'auto',
         overflowY: 'auto',
-        paddingBottom: '100px',
+        paddingBottom: '90px',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
       }}
@@ -1325,7 +1325,7 @@ function DesktopChatOverlay({ messages }) {
         zIndex: 20,
         pointerEvents: 'auto',
         overflowY: 'auto',
-        paddingBottom: '100px',
+        paddingBottom: '90px',
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 25%)',
       }}
@@ -1378,7 +1378,7 @@ function MessageBubble({ msg, compact }) {
     return (
       <div style={{
         ...base,
-         alignSelf: 'flex-end',
+        alignSelf: 'flex-start',
         background: '#D4AF37',
         color: '#000',
         fontWeight: 600,
