@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { io } from 'socket.io-client';
 
+const BACKEND = 'https://mingle-kfcz.onrender.com';
 /* ── WebRTC ICE config ──────────────────────────────────────────────── */
 const ICE_CONFIG = {
   iceServers: [
@@ -531,16 +532,22 @@ export default function ChatRoom() {
 
   /* ── Socket ─────────────────────────────────────────────────────── */
   const initSocket = () => {
-    const BACKEND = 'https://mingle-kfcz.onrender.com';
-    const socket = io(BACKEND, {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-    });
+const socket = io(BACKEND, {
+  transports: ['polling', 'websocket'],  // 🔥 correct order
+  reconnection: true,
+  reconnectionAttempts: 5,
+  timeout: 20000,
+  forceNew: true,
+  upgrade: true,  // 🔥 add this
+});
     socketRef.current = socket;
 
     socket.on('connect',    () => console.log('[Socket] connected:', socket.id));
     socket.on('disconnect', () => console.log('[Socket] disconnected'));
+
+    socket.on('connect_error', (err) => {
+  console.log('Socket error:', err.message);
+});
 
     socket.on('online_count', (n) => setOnlineCount(n));
 
