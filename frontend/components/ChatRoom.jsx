@@ -911,7 +911,7 @@ const socket = io(BACKEND, {
     src="/logo.png"
     alt="MinGle"
     style={{
-      height: 32,
+      height: 44,
       objectFit: 'contain'
     }}
   />
