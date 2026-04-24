@@ -435,15 +435,20 @@ export default function ChatRoom() {
 
   // ── Mobile viewport height fix ─────────────────────────────────────
   // FIX: was at column-0 indentation — moved inside component properly
+
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const setVH = () => {
-      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-    };
-    setVH();
-    window.addEventListener('resize', setVH);
-    return () => window.removeEventListener('resize', setVH);
-  }, []);
+  const setVH = () => {
+    const vh = window.visualViewport?.height || window.innerHeight;
+    document.documentElement.style.setProperty('--vh', `${vh * 0.01}px`);
+  };
+
+  setVH();
+
+  window.visualViewport?.addEventListener('resize', setVH);
+  return () => {
+    window.visualViewport?.removeEventListener('resize', setVH);
+  };
+}, []);
 
   // ── State ──────────────────────────────────────────────────────────
   const [status, setStatus]           = useState('idle'); // idle | waiting | connected
@@ -822,12 +827,10 @@ const socket = io(BACKEND, {
         left: 0,
         right: 0,
         bottom: 0,
-        
         background: '#0A0A0A',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        position: 'relative',
         fontFamily: '"DM Sans", sans-serif',
       }}
     >
@@ -1141,13 +1144,16 @@ const socket = io(BACKEND, {
 
       {/* ── Chat input bar ───────────────────────────────────────────── */}
       <div
-        style={{
-          position: 'absolute', bottom: 0, left: 0, width: '100%',
-          zIndex: 999,
-          background: 'rgba(10,10,10,0.95)',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          boxSizing: 'border-box',
-        }}
+     style={{
+  position: 'fixed',   // 🔥 main fix
+  bottom: 'env(safe-area-inset-bottom, 0px)',
+  left: 0,
+  width: '100%',
+  zIndex: 999,
+  background: 'rgba(10,10,10,0.95)',
+  paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+  boxSizing: 'border-box',
+}}
       >
         {/* Typing indicator */}
         {isTyping && (
