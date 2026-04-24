@@ -891,30 +891,31 @@ const socket = io(BACKEND, {
           zIndex: 10,
         }}
       >
-        {/* Logo */}
-        <button
-          onClick={() => router.push('/')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            padding: '4px 8px', borderRadius: 8, transition: 'background 0.2s',
-          }}
-          title="Back to home"
-        >
-          <span
-            style={{
-              fontFamily: '"Playfair Display", serif',
-              fontSize: 20,
-              fontWeight: 700,
-              background: 'linear-gradient(135deg, #FFD700, #D4AF37, #B8860B)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            Mingle
-          </span>
-        </button>
+   {/* Logo */}
+<button
+  onClick={() => router.push('/')}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '4px 8px',
+    borderRadius: 8,
+    transition: 'background 0.2s',
+  }}
+  title="Back to home"
+>
+  <img
+    src="/logo.png"
+    alt="MinGle"
+    style={{
+      height: 32,
+      objectFit: 'contain'
+    }}
+  />
+</button>
 
         {/* Ad space */}
         <div
