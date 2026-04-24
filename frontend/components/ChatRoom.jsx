@@ -467,6 +467,7 @@ export default function ChatRoom() {
   const [mediaReady, setMediaReady]   = useState(false);
   const [mediaError, setMediaError]   = useState('');
   const [isTyping, setIsTyping]       = useState(false);
+  const [showControls, setShowControls] = useState(false);
   // Tracks how many px the keyboard is covering at the bottom of the screen.
   // Used to lift the chat input above the keyboard without reflowing the video area.
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -486,6 +487,8 @@ export default function ChatRoom() {
   const typingTimeoutRef      = useRef(null);
   // FIX: throttle ref — prevents spamming 'typing' event on every keystroke
   const typingEmitRef         = useRef(0);
+  // Auto-hide timer for mobile controls (Mute / Vid Off / Report)
+  const controlsTimerRef      = useRef(null);
 
   // Keep statusRef in sync
   useEffect(() => { statusRef.current = status; }, [status]);
@@ -806,6 +809,15 @@ const socket = io(BACKEND, {
     }
   };
 
+  // ── Mobile controls auto-show / auto-hide ───────────────────────────
+  // Tap anywhere on the video area → show Mute/VidOff/Report for 3 s, then hide.
+  // NEXT button is always visible and is NOT affected by this logic.
+  const handleScreenTouch = () => {
+    setShowControls(true);
+    clearTimeout(controlsTimerRef.current);
+    controlsTimerRef.current = setTimeout(() => setShowControls(false), 3000);
+  };
+
   /* ── Control buttons config ─────────────────────────────────────── */
   const controls = [
     {
@@ -966,7 +978,11 @@ const socket = io(BACKEND, {
 
         {/* ── MOBILE layout ─────────────────────────────────────────── */}
         {isMobile ? (
-          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+          <div
+            style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}
+            onClick={handleScreenTouch}
+onTouchStart={handleScreenTouch}
+          >
 
             {/* Stranger video — top half */}
             <div style={{ flex: 1, position: 'relative', background: '#111', borderBottom: '1px solid rgba(212,175,55,0.15)', overflow: 'hidden' }}>
@@ -1020,14 +1036,49 @@ const socket = io(BACKEND, {
             {/* Chat overlay */}
             <MobileChatOverlay messages={messages} keyboardHeight={keyboardHeight} />
 
-            {/* Control buttons */}
-            <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 8, zIndex: 30 }}>
-              {controls.map((c) => (
-                <button key={c.key} onClick={c.onClick} className={c.className} title={c.title}>
-                  {c.icon}
-                  <span>{c.label}</span>
-                </button>
-              ))}
+            {/* NEXT button — always visible at bottom-right, never hides */}
+            <div
+              style={{
+                position: 'fixed',
+                bottom: keyboardHeight + 72,
+                right: 16,
+                zIndex: 1000,
+              }}
+            >
+              <button
+                onClick={status === 'idle' ? handleStart : handleNext}
+                className="ctrl-btn"
+                title={status === 'idle' ? 'Start' : 'Next stranger'}
+              >
+                <Icons.Next />
+                <span>Next</span>
+              </button>
+            </div>
+
+            {/* Mute / VidOff / Report — show on touch, auto-hide after 3 s */}
+            <div
+              style={{
+                position: 'fixed',
+                right: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                zIndex: 30,
+                opacity: showControls ? 1 : 0,
+                pointerEvents: showControls ? 'auto' : 'none',
+                transition: 'opacity 0.3s',
+              }}
+            >
+              {controls
+                .filter((c) => c.key !== 'next')
+                .map((c) => (
+                  <button key={c.key} onClick={c.onClick} className={c.className} title={c.title}>
+                    {c.icon}
+                    <span>{c.label}</span>
+                  </button>
+                ))}
             </div>
 
             {/* FIX: WaitingOverlay now actually rendered for mobile waiting state */}
