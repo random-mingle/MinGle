@@ -284,7 +284,7 @@ function MessageBubble({ msg, compact }) {
     borderRadius: 12,
     fontSize: compact ? 12 : 14,
     lineHeight: 1.4,
-    maxWidth: '70%',
+    maxWidth:  'fit-content',
    display: 'block', 
      width: 'auto',
     overflowWrap: 'break-word',
@@ -376,7 +376,12 @@ function MobileChatOverlay({ messages }) {
         }}
       >
         <div style={{ flex: '1 0 0' }} />
-       <div style={{ direction: 'ltr', width: '100%' }}>
+       <div style={{
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',   // 🔥 THIS FIXES WIDTH
+  width: 'auto'               // 🔥 VERY IMPORTANT
+}}>
   {messages.slice(-20).map((m) => (
     <MessageBubble key={m.id} msg={m} compact />
   ))}
