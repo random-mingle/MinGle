@@ -282,10 +282,12 @@ function MessageBubble({ msg, compact }) {
   const base = {
     padding: compact ? '6px 10px' : '8px 12px',
     borderRadius: 12,
-    fontSize: compact ? 12 : 13,
+    fontSize: compact ? 12 : 14,
     lineHeight: 1.4,
     maxWidth: '75%',
-  display: 'block',
+    display: 'inline-block', 
+    display: 'inline-block',   // 🔥 main fix
+    width: 'fit-content',      // 🔥 exact text size
     overflowWrap: 'break-word',
     whiteSpace: 'pre-wrap',
     fontFamily: '"DM Sans", sans-serif',
