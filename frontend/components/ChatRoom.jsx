@@ -809,7 +809,13 @@ export default function ChatRoom() {
     <div
       style={{
         width: '100%',
-        height: '100vh',
+        height: 'calc(var(--vh, 1vh) * 100)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        
         background: '#0A0A0A',
         display: 'flex',
         flexDirection: 'column',
@@ -1129,7 +1135,7 @@ export default function ChatRoom() {
       {/* ── Chat input bar ───────────────────────────────────────────── */}
       <div
         style={{
-          position: 'fixed', bottom: 0, left: 0, width: '100%',
+          position: 'absolute', bottom: 0, left: 0, width: '100%',
           zIndex: 999,
           background: 'rgba(10,10,10,0.95)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',

@@ -29,7 +29,7 @@ html,
 body {
   height: 100%;
   width: 100%;
- overflow-x: hidden;
+ overflow: hidden;
   background-color: var(--obsidian);
   color: #ffffff;
   font-family: 'DM Sans', system-ui, sans-serif;
