@@ -288,7 +288,7 @@ function MessageBubble({ msg, compact }) {
    display: 'block', 
      width: 'auto',
     overflowWrap: 'break-word',
-    alignSelf: 'flex-start',
+    alignSelf: 'flex-end',
     whiteSpace: 'pre-wrap',
     fontFamily: '"DM Sans", sans-serif',
     backdropFilter: 'blur(4px)',
