@@ -142,7 +142,9 @@ io.on('connection', (socket) => {
     broadcastOnlineCount();
   });
 });
-
+app.get('/', (req, res) => {
+  res.send('Backend running ✅');
+});
 // ── Health check ──────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
   res.json({
