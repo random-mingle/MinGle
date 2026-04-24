@@ -24,10 +24,12 @@
   padding: 0;
 }
 
+/* ── Root layout — merged (was duplicated at bottom) ───────────────── */
 html,
 body {
   height: 100%;
   width: 100%;
+ overflow-x: hidden;
   background-color: var(--obsidian);
   color: #ffffff;
   font-family: 'DM Sans', system-ui, sans-serif;
@@ -35,7 +37,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Scrollbar ─────────────────────────────────────────────────────── */
+/* ── Scrollbar — styled version (duplicate display:none removed) ───── */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -148,17 +150,15 @@ body {
   box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
-/* ── Video elements ────────────────────────────────────────────────── */
+/* ── Video elements — merged (was duplicated) ──────────────────────── */
 video {
   object-fit: cover;
+  image-rendering: auto;
   width: 100%;
   height: 100%;
   display: block;
 }
-video {
-  object-fit: cover;
-  image-rendering: auto;   /* 🔥 blur reduce */
-}
+
 /* ── Chat messages ─────────────────────────────────────────────────── */
 .msg-me {
   background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(184,134,11,0.15));
@@ -247,10 +247,6 @@ video {
 }
 
 /* ── Loading spinner ───────────────────────────────────────────────── */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .spinner {
   width: 36px;
   height: 36px;
@@ -261,15 +257,17 @@ video {
 }
 
 /* ── Pulsing dot indicator ─────────────────────────────────────────── */
-@keyframes ping {
-  75%, 100% { transform: scale(2); opacity: 0; }
-}
 .dot-ping {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background: var(--gold);
   animation: ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ── Floating animation (used on crown icon in landing page) ───────── */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
 /* ── Input styles ──────────────────────────────────────────────────── */
@@ -293,19 +291,19 @@ video {
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
 }
 
-/* ── Mobile: prevent layout shifts ─────────────────────────────────── */
+/* ── Mobile: safe height ────────────────────────────────────────────── */
+.h-screen-safe {
+  height: 100vh;
+  height: 100dvh;
+}
+
 @supports (height: 100dvh) {
   .h-screen-safe {
     height: 100dvh;
   }
 }
 
-.h-screen-safe {
-  height: 100vh;
-  height: 100dvh;
-}
-
-/* ── Fancy divider ─────────────────────────────────────────────────── */
+/* ── Gold divider ──────────────────────────────────────────────────── */
 .gold-divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
@@ -321,6 +319,42 @@ video {
   gap: 12px;
 }
 
+/* ── Keyframes ─────────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes orb1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(60px, -40px) scale(1.1); }
+  66%       { transform: translate(-30px, 30px) scale(0.95); }
+}
+
+@keyframes orb2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(-50px, 60px) scale(1.05); }
+  66%       { transform: translate(40px, -20px) scale(0.9); }
+}
+
+@keyframes orb3 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%       { transform: translate(-50%, -50%) scale(1.15); }
+}
+
 /* ── Responsive tweaks ─────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .ctrl-btn {
@@ -328,12 +362,4 @@ video {
     padding: 8px 6px;
     font-size: 9px;
   }
-}
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
-/* hide scrollbar */
-::-webkit-scrollbar {
-  display: none;
 }

@@ -1,7 +1,7 @@
 const express = require('express');
-const http = require('http');
+const http    = require('http');
 const { Server } = require('socket.io');
-const cors = require('cors');
+const cors    = require('cors');
 
 const app = express();
 app.use(cors());
@@ -11,7 +11,6 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: '*',
-    transports: ["websocket"],
     methods: ['GET', 'POST'],
     credentials: false,
   },
@@ -20,7 +19,7 @@ const io = new Server(server, {
 
 // ── State ─────────────────────────────────────────────────────────────
 const waitingQueue = []; // socket ids waiting for a partner
-const activePairs = new Map(); // socketId → partnerId (both directions)
+const activePairs  = new Map(); // socketId → partnerId (both directions)
 
 // ── Helpers ───────────────────────────────────────────────────────────
 function removeFromQueue(socketId) {
@@ -45,12 +44,14 @@ function broadcastOnlineCount() {
 io.on('connection', (socket) => {
   console.log(`[+] Connected: ${socket.id}  (total: ${io.engine.clientsCount})`);
   broadcastOnlineCount();
+
+  // ── Typing indicator ────────────────────────────────────────────────
   socket.on('typing', () => {
-  const partnerId = activePairs.get(socket.id);
-  if (partnerId) {
-    io.to(partnerId).emit('typing');
-  }
-});
+    const partnerId = activePairs.get(socket.id);
+    if (partnerId) {
+      io.to(partnerId).emit('typing');
+    }
+  });
 
   // ── Find Match ──────────────────────────────────────────────────────
   socket.on('find_match', () => {
@@ -65,9 +66,6 @@ io.on('connection', (socket) => {
     let matched = false;
     while (waitingQueue.length > 0) {
       const candidateId = waitingQueue.shift();
-      
-       
-      
 
       // Skip stale entries (disconnected sockets)
       const candidateSocket = io.sockets.sockets.get(candidateId);
@@ -78,7 +76,7 @@ io.on('connection', (socket) => {
       activePairs.set(candidateId, socket.id);
 
       // Notify both: initiator creates the WebRTC offer
-      socket.emit('matched', { initiator: true, partnerId: candidateId });
+      socket.emit('matched', { initiator: true,  partnerId: candidateId });
       io.to(candidateId).emit('matched', { initiator: false, partnerId: socket.id });
 
       console.log(`[~] Paired: ${socket.id} ↔ ${candidateId}`);
@@ -109,7 +107,6 @@ io.on('connection', (socket) => {
     if (!partnerId) return;
     if (!text || typeof text !== 'string' || text.trim().length === 0) return;
 
-    // Sanitise slightly (no XSS in server; client handles rendering)
     const sanitised = text.trim().slice(0, 500);
     io.to(partnerId).emit('message', { text: sanitised });
   });
@@ -127,7 +124,7 @@ io.on('connection', (socket) => {
     socket.emit('find_match_trigger');
   });
 
-  // ── Report (log only – extend with DB / moderation as needed) ───────
+  // ── Report ───────────────────────────────────────────────────────────
   socket.on('report', ({ reason }) => {
     const partnerId = activePairs.get(socket.id);
     console.log(`[!] Report: ${socket.id} reported ${partnerId} — reason: ${reason}`);
@@ -150,9 +147,9 @@ io.on('connection', (socket) => {
 app.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
-    online: io.engine.clientsCount,
+    online:  io.engine.clientsCount,
     waiting: waitingQueue.length,
-    pairs: activePairs.size / 2,
+    pairs:   activePairs.size / 2,
   });
 });
 
@@ -162,7 +159,5 @@ server.listen(PORT, () => {
   console.log(`🚀 Mingle backend running on http://localhost:${PORT}`);
 });
 
-/* 🔥 KEEP SERVER ALIVE */
-setInterval(() => {
-  console.log("Server alive ping");
-}, 30000);
+// Keep alive ping (useful on free-tier hosts that sleep)
+setInterval(() => console.log('[ping] Server alive'), 30000);

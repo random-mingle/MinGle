@@ -4,25 +4,24 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { io } from 'socket.io-client';
 
-/* ── WebRTC ICE config (free Google STUN + public TURN fallback) ───── */
+/* ── WebRTC ICE config ──────────────────────────────────────────────── */
 const ICE_CONFIG = {
   iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-
+    { urls: 'stun:stun.l.google.com:19302' },
     {
-      urls: "turn:openrelay.metered.ca:80",
-      username: "openrelayproject",
-      credential: "openrelayproject",
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
     },
     {
-      urls: "turn:openrelay.metered.ca:443",
-      username: "openrelayproject",
-      credential: "openrelayproject",
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
     },
   ],
 };
 
-/* ── Icons (inline SVGs to keep zero-deps) ──────────────────────────── */
+/* ── Icons (inline SVGs — zero deps) ───────────────────────────────── */
 const Icons = {
   Next: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -79,7 +78,11 @@ const Icons = {
   ),
 };
 
-/* ── Waiting overlay ─────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   WAITING OVERLAY
+   FIX: Was defined but never rendered anywhere — now used when
+   status === 'waiting' over the video area.
+   ══════════════════════════════════════════════════════════════════════ */
 function WaitingOverlay({ onCancel }) {
   return (
     <div
@@ -88,6 +91,7 @@ function WaitingOverlay({ onCancel }) {
         inset: 0,
         background: 'rgba(10,10,10,0.92)',
         backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         zIndex: 50,
         display: 'flex',
         flexDirection: 'column',
@@ -96,27 +100,20 @@ function WaitingOverlay({ onCancel }) {
         gap: 20,
       }}
     >
-      {/* Pulsing crown */}
+      {/* Spinning rings */}
       <div style={{ position: 'relative', width: 80, height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            borderRadius: '50%',
-            border: '2px solid rgba(212,175,55,0.3)',
-            animation: 'spin 2s linear infinite',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: 8,
-            borderRadius: '50%',
-            border: '2px solid rgba(212,175,55,0.15)',
-            animation: 'spin 3s linear infinite reverse',
-          }}
-        />
-        
+        <div style={{
+          position: 'absolute', inset: 0,
+          borderRadius: '50%',
+          border: '2px solid rgba(212,175,55,0.3)',
+          animation: 'spin 2s linear infinite',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 8,
+          borderRadius: '50%',
+          border: '2px solid rgba(212,175,55,0.15)',
+          animation: 'spin 3s linear infinite reverse',
+        }} />
       </div>
 
       <div style={{ textAlign: 'center' }}>
@@ -134,11 +131,10 @@ function WaitingOverlay({ onCancel }) {
           <div
             key={i}
             style={{
-              width: 8,
-              height: 8,
+              width: 8, height: 8,
               borderRadius: '50%',
               background: '#D4AF37',
-              animation: `pulse 1.4s ease-in-out ${i * 0.2}s infinite`,
+              animation: `waitPulse 1.4s ease-in-out ${i * 0.2}s infinite`,
             }}
           />
         ))}
@@ -164,31 +160,38 @@ function WaitingOverlay({ onCancel }) {
       </button>
 
       <style>{`
-        @keyframes pulse {
+        @keyframes waitPulse {
           0%, 100% { opacity: 0.3; transform: scale(0.8); }
-          50% { opacity: 1; transform: scale(1.2); }
+          50%       { opacity: 1;   transform: scale(1.2); }
         }
       `}</style>
     </div>
   );
 }
 
-/* ── Report modal ─────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   REPORT MODAL
+   ══════════════════════════════════════════════════════════════════════ */
 function ReportModal({ onClose, onSubmit }) {
   const [reason, setReason] = useState('');
-  const reasons = ['Inappropriate content', 'Harassment', 'Nudity / Sexual content', 'Spam / Bot', 'Underage user', 'Other'];
+  const reasons = [
+    'Inappropriate content',
+    'Harassment',
+    'Nudity / Sexual content',
+    'Spam / Bot',
+    'Underage user',
+    'Other',
+  ];
 
   return (
     <div
       style={{
-        position: 'fixed',
-        inset: 0,
+        position: 'fixed', inset: 0,
         background: 'rgba(0,0,0,0.85)',
         backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         zIndex: 200,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 20,
       }}
       onClick={onClose}
@@ -211,6 +214,7 @@ function ReportModal({ onClose, onSubmit }) {
         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 20, fontFamily: '"DM Sans", sans-serif' }}>
           Help keep Mingle safe. Select a reason:
         </p>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
           {reasons.map((r) => (
             <button
@@ -233,18 +237,16 @@ function ReportModal({ onClose, onSubmit }) {
             </button>
           ))}
         </div>
+
         <div style={{ display: 'flex', gap: 10 }}>
           <button
             onClick={onClose}
             style={{
-              flex: 1,
-              padding: '12px',
-              borderRadius: 10,
+              flex: 1, padding: '12px', borderRadius: 10,
               border: '1px solid rgba(255,255,255,0.1)',
               background: 'transparent',
               color: 'rgba(255,255,255,0.5)',
-              cursor: 'pointer',
-              fontSize: 13,
+              cursor: 'pointer', fontSize: 13,
               fontFamily: '"DM Sans", sans-serif',
             }}
           >
@@ -254,15 +256,12 @@ function ReportModal({ onClose, onSubmit }) {
             onClick={() => reason && onSubmit(reason)}
             disabled={!reason}
             style={{
-              flex: 1,
-              padding: '12px',
-              borderRadius: 10,
+              flex: 1, padding: '12px', borderRadius: 10,
               border: 'none',
               background: reason ? 'linear-gradient(135deg, #D4AF37, #B8860B)' : 'rgba(255,255,255,0.1)',
               color: reason ? '#000' : 'rgba(255,255,255,0.3)',
               cursor: reason ? 'pointer' : 'not-allowed',
-              fontWeight: 700,
-              fontSize: 13,
+              fontWeight: 700, fontSize: 13,
               fontFamily: '"DM Sans", sans-serif',
               transition: 'all 0.2s',
             }}
@@ -275,58 +274,205 @@ function ReportModal({ onClose, onSubmit }) {
   );
 }
 
-/* ── Main ChatRoom ────────────────────────────────────────────────────── */
-
-
-export default function ChatRoom() {
-  useEffect(() => {
-  if (typeof window === 'undefined') return;
-
-  const setVH = () => {
-    document.documentElement.style.setProperty(
-      '--vh',
-      `${window.innerHeight * 0.01}px`
-    );
+/* ══════════════════════════════════════════════════════════════════════
+   MESSAGE BUBBLE
+   FIX: `display: 'inline-block'` had a leading-space indentation bug.
+   ══════════════════════════════════════════════════════════════════════ */
+function MessageBubble({ msg, compact }) {
+  const base = {
+    padding: compact ? '6px 10px' : '8px 12px',
+    borderRadius: 12,
+    fontSize: compact ? 12 : 13,
+    lineHeight: 1.4,
+    maxWidth: '75%',
+  display: 'block',
+    overflowWrap: 'break-word',
+    whiteSpace: 'pre-wrap',
+    fontFamily: '"DM Sans", sans-serif',
+    backdropFilter: 'blur(4px)',
   };
 
-  setVH();
-  window.addEventListener('resize', setVH);
+  if (msg.from === 'system') {
+    return (
+      <div style={{
+        ...base,
+        alignSelf: 'center',
+        background: 'rgba(212,175,55,0.08)',
+        color: '#D4AF37',
+        fontStyle: 'italic',
+        fontSize: compact ? 11 : 12,
+        borderRadius: 20,
+      }}>
+        {msg.text}
+      </div>
+    );
+  }
 
-  return () => window.removeEventListener('resize', setVH);
-}, []);
+  if (msg.from === 'me') {
+    return (
+      <div style={{
+        ...base,
+        alignSelf: 'flex-start',
+        background: '#D4AF37',
+        color: '#000',
+        fontWeight: 600,
+        borderRadius: '14px',
+      }}>
+        {msg.text}
+      </div>
+    );
+  }
 
-  const [isTyping, setIsTyping] = useState(false);
+  // Stranger
+  return (
+    <div style={{
+      ...base,
+      alignSelf: 'flex-start',
+      background: 'rgba(0,0,0,0.6)',
+      color: '#fff',
+      borderRadius: '14px',
+    }}>
+      {msg.text}
+    </div>
+  );
+}
 
+/* ── Mobile chat overlay ────────────────────────────────────────────── */
+function MobileChatOverlay({ messages }) {
+  const endRef = useRef(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: 0, top: 60, bottom: 70,
+        width: '100%',
+        zIndex: 999,
+        pointerEvents: 'none',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          height: '100%',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          direction: 'rtl', 
+          alignItems: 'flex-start',
+          width: '100%',
+          maxWidth: '260px',
+          gap: 6,
+          padding: '10px 8px 12px',
+          pointerEvents: 'auto',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        <div style={{ flex: '1 0 0' }} />
+       <div style={{ direction: 'ltr', width: '100%' }}>
+  {messages.slice(-20).map((m) => (
+    <MessageBubble key={m.id} msg={m} compact />
+  ))}
+</div>
+        <div ref={endRef} />
+      </div>
+    </div>
+  );
+}
+
+/* ── Desktop chat overlay ───────────────────────────────────────────── */
+function DesktopChatOverlay({ messages }) {
+  const endRef = useRef(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: 0, bottom: 0, top: 60,
+        width: '100%',
+        maxWidth: '320px',
+        zIndex: 20,
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          height: '100%',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 7,
+          padding: '12px 10px 80px',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        <div style={{ flex: '1 0 0' }} />
+        {messages.slice(-20).map((m) => (
+          <MessageBubble key={m.id} msg={m} />
+        ))}
+        <div ref={endRef} />
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   MAIN CHATROOM
+   ══════════════════════════════════════════════════════════════════════ */
+export default function ChatRoom() {
   const router = useRouter();
 
-  // ── State ──────────────────────────────────────────────────────────
-  const [status, setStatus] = useState('idle'); // idle | waiting | connected
-  const [messages, setMessages] = useState([]);
-  const [inputText, setInputText] = useState('');
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOff, setIsVideoOff] = useState(false);
-  const [onlineCount, setOnlineCount] = useState(0);
-  const [showReport, setShowReport] = useState(false);
-  const [reportSent, setReportSent] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [mediaReady, setMediaReady] = useState(false);
-  const [mediaError, setMediaError] = useState('');
+  // ── Mobile viewport height fix ─────────────────────────────────────
+  // FIX: was at column-0 indentation — moved inside component properly
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const setVH = () => {
+      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    };
+    setVH();
+    window.addEventListener('resize', setVH);
+    return () => window.removeEventListener('resize', setVH);
+  }, []);
 
+  // ── State ──────────────────────────────────────────────────────────
+  const [status, setStatus]           = useState('idle'); // idle | waiting | connected
+  const [messages, setMessages]       = useState([]);
+  const [inputText, setInputText]     = useState('');
+  const [isMuted, setIsMuted]         = useState(false);
+  const [isVideoOff, setIsVideoOff]   = useState(false);
+  const [onlineCount, setOnlineCount] = useState(0);
+  const [showReport, setShowReport]   = useState(false);
+  const [reportSent, setReportSent]   = useState(false);
+  const [isMobile, setIsMobile]       = useState(false);
+  const [mediaReady, setMediaReady]   = useState(false);
+  const [mediaError, setMediaError]   = useState('');
+  const [isTyping, setIsTyping]       = useState(false);
 
   // ── Refs ───────────────────────────────────────────────────────────
-  const socketRef = useRef(null);
-  const pcRef = useRef(null);
-  const localStreamRef = useRef(null);
-  const partnerIdRef = useRef(null);
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
-  const messagesEndRef = useRef(null);
-  const pendingCandidatesRef = useRef([]);
-  const remoteDescSetRef = useRef(false);
-  const statusRef = useRef('idle');
-  const inputRef = useRef(null);
-  // FIX: ref to clear typing timeout properly
-  const typingTimeoutRef = useRef(null);
+  const socketRef             = useRef(null);
+  const pcRef                 = useRef(null);
+  const localStreamRef        = useRef(null);
+  const partnerIdRef          = useRef(null);
+  const localVideoRef         = useRef(null);
+  const remoteVideoRef        = useRef(null);
+  const messagesEndRef        = useRef(null);
+  const pendingCandidatesRef  = useRef([]);
+  const remoteDescSetRef      = useRef(false);
+  const statusRef             = useRef('idle');
+  const inputRef              = useRef(null);
+  const typingTimeoutRef      = useRef(null);
+  // FIX: throttle ref — prevents spamming 'typing' event on every keystroke
+  const typingEmitRef         = useRef(0);
 
   // Keep statusRef in sync
   useEffect(() => { statusRef.current = status; }, [status]);
@@ -344,16 +490,16 @@ export default function ChatRoom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // ── Auto-attach local stream
+  // ── Auto-attach local stream ───────────────────────────────────────
   useEffect(() => {
     if (localStreamRef.current && localVideoRef.current) {
       if (localVideoRef.current.srcObject !== localStreamRef.current) {
         localVideoRef.current.srcObject = localStreamRef.current;
       }
     }
-  }, []); // 🔥 only once run
+  }, []);
 
-  // ── Initialise media + socket on mount ────────────────────────────
+  // ── Init media + socket on mount ──────────────────────────────────
   useEffect(() => {
     initMedia();
     initSocket();
@@ -365,24 +511,14 @@ export default function ChatRoom() {
   const initMedia = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          frameRate: { ideal: 24 }
-        },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24 } },
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       });
       localStreamRef.current = stream;
       setMediaReady(true);
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
-
     } catch (err) {
       console.error('Media error:', err);
       setMediaError(
@@ -395,16 +531,15 @@ export default function ChatRoom() {
 
   /* ── Socket ─────────────────────────────────────────────────────── */
   const initSocket = () => {
-    const BACKEND = "https://mingle-kfcz.onrender.com";
+    const BACKEND = 'https://mingle-kfcz.onrender.com';
     const socket = io(BACKEND, {
       transports: ['websocket'],
-
       reconnection: true,
       reconnectionAttempts: 5,
     });
     socketRef.current = socket;
 
-    socket.on('connect', () => console.log('[Socket] connected:', socket.id));
+    socket.on('connect',    () => console.log('[Socket] connected:', socket.id));
     socket.on('disconnect', () => console.log('[Socket] disconnected'));
 
     socket.on('online_count', (n) => setOnlineCount(n));
@@ -435,7 +570,6 @@ export default function ChatRoom() {
           remoteDescSetRef.current = true;
           await flushCandidates(pc);
         } else if (signal.candidate !== undefined) {
-          // ICE candidate
           if (remoteDescSetRef.current) {
             await pc.addIceCandidate(new RTCIceCandidate(signal)).catch(() => {});
           } else {
@@ -454,7 +588,6 @@ export default function ChatRoom() {
       ]);
     });
 
-    // FIX: missing typing listener — isTyping state was never set to true
     socket.on('typing', () => {
       setIsTyping(true);
       clearTimeout(typingTimeoutRef.current);
@@ -463,17 +596,10 @@ export default function ChatRoom() {
 
     socket.on('partner_disconnected', () => {
       closePC();
-
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = null;
-      }
-
+      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
       setStatus('waiting');
-
-      // 🔥 NEW ADD (IMPORTANT)
       addSysMsg('Stranger disconnected... finding new one 🔄');
-
-      socket.emit('find_match'); // auto next
+      socket.emit('find_match');
     });
 
     socket.on('find_match_trigger', () => {
@@ -497,7 +623,7 @@ export default function ChatRoom() {
   /* ── Peer Connection ────────────────────────────────────────────── */
   const createPC = async (initiator, partnerId) => {
     closePC();
-    remoteDescSetRef.current = false;
+    remoteDescSetRef.current  = false;
     pendingCandidatesRef.current = [];
 
     const pc = new RTCPeerConnection(ICE_CONFIG);
@@ -505,9 +631,7 @@ export default function ChatRoom() {
 
     // Add local tracks
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((t) => {
-        pc.addTrack(t, localStreamRef.current);
-      });
+      localStreamRef.current.getTracks().forEach((t) => pc.addTrack(t, localStreamRef.current));
     }
 
     // Receive remote stream
@@ -520,40 +644,34 @@ export default function ChatRoom() {
     // Send ICE candidates
     pc.onicecandidate = ({ candidate }) => {
       if (candidate && socketRef.current && partnerId) {
-        socketRef.current.emit('signal', {
-          signal: candidate.toJSON(),
-          to: partnerId,
-        });
+        socketRef.current.emit('signal', { signal: candidate.toJSON(), to: partnerId });
       }
     };
 
     pc.onconnectionstatechange = () => {
       console.log('[PC state]', pc.connectionState);
-      if (pc.connectionState === 'failed') {
-        pc.restartIce();
-      }
+      if (pc.connectionState === 'failed') pc.restartIce();
     };
 
     if (initiator) {
-      // 🔥 VIDEO QUALITY BOOST
-      const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
-
-      if (sender) {
-        const params = sender.getParameters();
-
-        if (!params.encodings) {
-          params.encodings = [{}];
-        }
-
-        params.encodings[0].maxBitrate = 1500000; // 1.5 Mbps
-
-        sender.setParameters(params);
-      }
       const offer = await pc.createOffer({
         offerToReceiveVideo: true,
         offerToReceiveAudio: true,
       });
       await pc.setLocalDescription(offer);
+
+      // FIX: bitrate boost moved to AFTER setLocalDescription — correct WebRTC order.
+      // setParameters() must be called after local description is set.
+      const sender = pc.getSenders().find((s) => s.track && s.track.kind === 'video');
+      if (sender) {
+        const params = sender.getParameters();
+        if (!params.encodings || params.encodings.length === 0) {
+          params.encodings = [{}];
+        }
+        params.encodings[0].maxBitrate = 1_500_000; // 1.5 Mbps
+        sender.setParameters(params).catch(() => {});
+      }
+
       socketRef.current?.emit('signal', { signal: offer, to: partnerId });
     }
   };
@@ -563,7 +681,7 @@ export default function ChatRoom() {
       pcRef.current.close();
       pcRef.current = null;
     }
-    remoteDescSetRef.current = false;
+    remoteDescSetRef.current     = false;
     pendingCandidatesRef.current = [];
   }, []);
 
@@ -583,35 +701,25 @@ export default function ChatRoom() {
 
   /* ── Controls ───────────────────────────────────────────────────── */
   const handleStart = () => {
-    // FIX: Removed the early-return guard that silently blocked clicks on mobile.
-    // Previously: if (!mediaReady && !mediaError) return
-    // Problem: on Android/iPhone the camera permission dialog is async —
-    // user clicks START before mediaReady=true, nothing happened with zero feedback.
-    // createPC already null-checks localStreamRef so missing media is safe.
     socketRef.current?.emit('find_match');
     setMessages([]);
     setStatus('waiting');
   };
 
+  // FIX: added optional chaining on socketRef — prevents crash if socket is null
   const handleNext = () => {
     closePC();
-
-    // video clear
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = null;
-    }
-
-    // chat clear
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
     setMessages([]);
-
-    // status update
     setStatus('waiting');
-
-    // message
     addSysMsg('🔎 Finding new stranger...');
+    socketRef.current?.emit('find_match');
+  };
 
-    // find new match
-    socketRef.current.emit('find_match');
+  const handleCancelWaiting = () => {
+    socketRef.current?.emit('next');
+    setStatus('idle');
+    setMessages([]);
   };
 
   const handleMute = () => {
@@ -694,12 +802,14 @@ export default function ChatRoom() {
     },
   ];
 
-  /* ── Render ─────────────────────────────────────────────────────── */
+  /* ══════════════════════════════════════════════════════════════════
+     RENDER
+     ══════════════════════════════════════════════════════════════════ */
   return (
     <div
       style={{
         width: '100%',
-        height: '100vh',
+        height: 'calc(var(--vh, 1vh) * 100)',
         background: '#0A0A0A',
         display: 'flex',
         flexDirection: 'column',
@@ -708,10 +818,10 @@ export default function ChatRoom() {
         fontFamily: '"DM Sans", sans-serif',
       }}
     >
-      {/* ── Noise overlay ──── */}
+      {/* Noise overlay */}
       <div className="noise-overlay" aria-hidden />
 
-      {/* ── Ad Banner ──────────────────────────────────────────────── */}
+      {/* ── Header / Ad banner ──────────────────────────────────────── */}
       <div
         style={{
           height: 68,
@@ -729,19 +839,12 @@ export default function ChatRoom() {
         <button
           onClick={() => router.push('/')}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '4px 8px',
-            borderRadius: 8,
-            transition: 'background 0.2s',
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            padding: '4px 8px', borderRadius: 8, transition: 'background 0.2s',
           }}
           title="Back to home"
         >
-         
           <span
             style={{
               fontFamily: '"Playfair Display", serif',
@@ -760,154 +863,84 @@ export default function ChatRoom() {
         {/* Ad space */}
         <div
           style={{
-            flex: 1,
-            margin: '0 12px',
-            height: 44,
-            borderRadius: 8,
+            flex: 1, margin: '0 12px', height: 44, borderRadius: 8,
             border: '1px dashed rgba(212,175,55,0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: 'rgba(212,175,55,0.25)',
-            fontSize: 11,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            fontFamily: '"DM Sans", sans-serif',
-            maxWidth: 480,
+            fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase',
+            fontFamily: '"DM Sans", sans-serif', maxWidth: 480,
           }}
         >
           Ad Space
         </div>
 
-        {/* Online counter */}
+        {/* FIX: Online counter — count was missing from JSX, only the dot was rendered */}
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: 12,
-            whiteSpace: 'nowrap',
+            display: 'flex', alignItems: 'center', gap: 6,
+            color: 'rgba(255,255,255,0.5)', fontSize: 12, whiteSpace: 'nowrap',
           }}
         >
           <div style={{ position: 'relative', width: 8, height: 8 }}>
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: '50%',
-                background: '#22c55e',
-                animation: 'ping 1.4s cubic-bezier(0,0,0.2,1) infinite',
-              }}
-            />
+            <div style={{
+              position: 'absolute', inset: 0,
+              borderRadius: '50%', background: '#22c55e',
+              animation: 'ping 1.4s cubic-bezier(0,0,0.2,1) infinite',
+            }} />
             <div style={{ position: 'absolute', inset: 1, borderRadius: '50%', background: '#22c55e' }} />
           </div>
-         
+          <span>{onlineCount.toLocaleString()} online</span>
         </div>
       </div>
 
-      {/* ── Main area ──────────────────────────────────────────────── */}
+      {/* ── Main area ───────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
 
-
-  {/* 🔥 CENTER LOGO — only show after connected */}
-  {status === 'connected' && (
-    <div
-      style={{
-        position: 'absolute',
-        top: isMobile ? '5%' : '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 999,
-        pointerEvents: 'auto',
-      }}
-    >
-      {/* Desktop logo */}
-      {!isMobile && (
-        <img
-          src="/logo.png"
-          style={{
-            width: '100px',
-            opacity: 0.9,
-          }}
-        />
-      )}
-
-      {/* Mobile split logo */}
-      {isMobile && (
-        <div style={{ position: 'relative', width: 120, height: 50 }}>
-
-          {/* TOP HALF */}
-          <img
-            src="/logo.png"
+        {/* Center logo when connected */}
+        {status === 'connected' && (
+          <div
             style={{
               position: 'absolute',
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              clipPath: 'inset(0 0 50% 0)',
+              top: isMobile ? '5%' : '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 999,
+              pointerEvents: 'auto',
             }}
-          />
+          >
+            {!isMobile && (
+              <img src="/logo.png" style={{ width: '100px', opacity: 0.9 }} alt="Mingle" />
+            )}
+            {isMobile && (
+              <div style={{ position: 'relative', width: 120, height: 50 }}>
+                <img src="/logo.png" style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', clipPath: 'inset(0 0 50% 0)' }} alt="" />
+                <img src="/logo.png" style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', clipPath: 'inset(50% 0 0 0)' }} alt="" />
+              </div>
+            )}
+          </div>
+        )}
 
-          {/* BOTTOM HALF */}
-          <img
-            src="/logo.png"
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              clipPath: 'inset(50% 0 0 0)',
-            }}
-          />
-
-        </div>
-      )}
-    </div>
-  )}
-  
-        {/* ── MOBILE layout ────────────────────────────────────────── */}
+        {/* ── MOBILE layout ─────────────────────────────────────────── */}
         {isMobile ? (
-          <div style={{
-  width: '100%',
-  height: '100%',        /* FIX #1: was 100dvh — caused double-height inside flex:1 parent */
-  display: 'flex',
-  flexDirection: 'column',
-  position: 'relative',
-  overflow: 'hidden',
-}}>
-            {/* Top half: Stranger video */}
-            <div
-              style={{
-                flex: 1,
-                position: 'relative',
-                background: '#111',
-                borderBottom: '1px solid rgba(212,175,55,0.15)',
-                overflow: 'hidden',
-              }}
-            >
+          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+
+            {/* Stranger video — top half */}
+            <div style={{ flex: 1, position: 'relative', background: '#111', borderBottom: '1px solid rgba(212,175,55,0.15)', overflow: 'hidden' }}>
               <video
                 ref={remoteVideoRef}
                 autoPlay
                 playsInline
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block',
+                  width: '100%', height: '100%',
+                  objectFit: 'cover', display: 'block',
                   transform: 'scaleX(-1) translateZ(0)',
-backfaceVisibility: 'hidden',
-WebkitBackfaceVisibility: 'hidden',
-                  imageRendering: 'auto'
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  imageRendering: 'auto',
                 }}
               />
-             
-              {/* Placeholder when no stream */}
               {status !== 'connected' && (
-                <div
-                  className="video-placeholder"
-                  style={{ position: 'absolute', inset: 0 }}
-                >
+                <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
                   <span style={{ fontSize: 48, opacity: 0.15 }}>👤</span>
                   <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>
                     {status === 'waiting' ? 'Searching…' : 'Waiting for match'}
@@ -916,33 +949,22 @@ WebkitBackfaceVisibility: 'hidden',
               )}
             </div>
 
-            {/* Bottom half: Self video */}
-            <div
-              style={{
-                flex: 1,
-                position: 'relative',
-                background: '#0e0e0e',
-                overflow: 'hidden',
-              }}
-            >
+            {/* Self video — bottom half */}
+            <div style={{ flex: 1, position: 'relative', background: '#0e0e0e', overflow: 'hidden' }}>
               <video
                 ref={localVideoRef}
                 autoPlay
                 playsInline
                 muted
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  backgroundColor: "#000",
-                  display: 'block',
-                 transform: 'scaleX(-1) translateZ(0)',
-backfaceVisibility: 'hidden',
-WebkitBackfaceVisibility: 'hidden',
+                  width: '100%', height: '100%',
+                  objectFit: 'cover', backgroundColor: '#000', display: 'block',
+                  transform: 'scaleX(-1) translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
                   filter: isVideoOff ? 'brightness(0)' : 'none',
                 }}
               />
-            
               {isVideoOff && (
                 <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
                   <span style={{ fontSize: 36, opacity: 0.3 }}>🎥</span>
@@ -951,73 +973,42 @@ WebkitBackfaceVisibility: 'hidden',
               )}
             </div>
 
-            {/* Chat overlay — left side, over both videos */}
-           <MobileChatOverlay messages={messages} />
+            {/* Chat overlay */}
+            <MobileChatOverlay messages={messages} />
 
-            {/* Right-side control buttons — floating over videos */}
-            <div
-              style={{
-                position: 'absolute',
-                right: 10,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-                zIndex: 30,
-              }}
-            >
+            {/* Control buttons */}
+            <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 8, zIndex: 30 }}>
               {controls.map((c) => (
-                <button
-                  key={c.key}
-                  onClick={c.onClick}
-                  className={c.className}
-                  title={c.title}
-                >
+                <button key={c.key} onClick={c.onClick} className={c.className} title={c.title}>
                   {c.icon}
                   <span>{c.label}</span>
                 </button>
               ))}
             </div>
+
+            {/* FIX: WaitingOverlay now actually rendered for mobile waiting state */}
+            {status === 'waiting' && <WaitingOverlay onCancel={handleCancelWaiting} />}
           </div>
 
         ) : (
-          /* ── DESKTOP layout ──────────────────────────────────────── */
-          <div style={{
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  position: 'relative',
-  overflow: 'hidden'   // 🔥 add this line
-}}>
+          /* ── DESKTOP layout ───────────────────────────────────────── */
+          <div style={{ width: '100%', height: '100%', display: 'flex', position: 'relative', overflow: 'hidden' }}>
 
-            {/* Left video: Stranger */}
-            <div
-              style={{
-                flex: 1,
-                position: 'relative',
-                background: '#111',
-                borderRight: 'none',
-                overflow: 'hidden',
-                marginRight: '-1px',
-              }}
-            >
+            {/* Left: Stranger video */}
+            <div style={{ flex: 1, position: 'relative', background: '#111', overflow: 'hidden', marginRight: '-1px' }}>
               <video
                 ref={remoteVideoRef}
                 autoPlay
                 playsInline
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block',
+                  width: '100%', height: '100%',
+                  objectFit: 'cover', display: 'block',
                   transform: 'scaleX(-1) translateZ(0)',
-backfaceVisibility: 'hidden',
-WebkitBackfaceVisibility: 'hidden',
-  willChange: 'transform',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  willChange: 'transform',
                 }}
               />
-            
               {status !== 'connected' && (
                 <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
                   <span style={{ fontSize: 64, opacity: 0.1 }}>👤</span>
@@ -1026,40 +1017,29 @@ WebkitBackfaceVisibility: 'hidden',
                   </span>
                 </div>
               )}
-
-              {/* Chat overlay on stranger video */}
               <DesktopChatOverlay messages={messages} />
+
+              {/* FIX: WaitingOverlay now actually rendered for desktop waiting state */}
+              {status === 'waiting' && <WaitingOverlay onCancel={handleCancelWaiting} />}
             </div>
 
-            {/* Right video: You */}
-            <div
-              style={{
-                flex: 1,
-                position: 'relative',
-                background: '#0e0e0e',
-                overflow: 'hidden',
-                marginLeft: '-1px',
-              }}
-            >
+            {/* Right: Self video */}
+            <div style={{ flex: 1, position: 'relative', background: '#0e0e0e', overflow: 'hidden', marginLeft: '-1px' }}>
               <video
                 ref={localVideoRef}
                 autoPlay
                 playsInline
                 muted
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  backgroundColor: "#000",
-                  display: 'block',
-                transform: 'scaleX(-1) translateZ(0)',
-backfaceVisibility: 'hidden',
-WebkitBackfaceVisibility: 'hidden',
-willChange: 'transform',
+                  width: '100%', height: '100%',
+                  objectFit: 'cover', backgroundColor: '#000', display: 'block',
+                  transform: 'scaleX(-1) translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  willChange: 'transform',
                   filter: isVideoOff ? 'brightness(0)' : 'none',
                 }}
               />
-              
               {isVideoOff && (
                 <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
                   <span style={{ fontSize: 52, opacity: 0.2 }}>🎥</span>
@@ -1067,84 +1047,60 @@ willChange: 'transform',
                 </div>
               )}
 
-              {/* Control buttons — right side of right video */}
-              <div
-                style={{
-                  position: 'absolute',
-                  right: 14,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 10,
-                  zIndex: 30,
-                }}
-              >
+              {/* Control buttons */}
+              <div style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 10, zIndex: 30 }}>
                 {controls.map((c) => (
-                  <button
-                    key={c.key}
-                    onClick={c.onClick}
-                    className={c.className}
-                    title={c.title}
-                  >
+                  <button key={c.key} onClick={c.onClick} className={c.className} title={c.title}>
                     {c.icon}
                     <span>{c.label}</span>
                   </button>
                 ))}
               </div>
             </div>
-
           </div>
         )}
 
-        {/* Idle overlay (START screen) */}
+        {/* ── Idle overlay (START screen) ───────────────────────────── */}
         {status === 'idle' && (
           <div
             style={{
-              position: 'absolute',
-              inset: 0,
+              position: 'absolute', inset: 0,
               background: 'rgba(10,10,10,0.88)',
               backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
               zIndex: 9999,
-               pointerEvents: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
+              pointerEvents: 'auto',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
               gap: 20,
             }}
           >
-           
             <div style={{ textAlign: 'center' }}>
-              <p
-                style={{
-                  fontFamily: '"Playfair Display", serif',
-                  fontSize: 28,
-                  fontWeight: 700,
-                  background: 'linear-gradient(135deg, #FFD700, #D4AF37, #B8860B)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  marginBottom: 8,
-                }}
-              >
+              <p style={{
+                fontFamily: '"Playfair Display", serif',
+                fontSize: 28, fontWeight: 700,
+                background: 'linear-gradient(135deg, #FFD700, #D4AF37, #B8860B)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                marginBottom: 8,
+              }}>
                 Ready to Mingle?
               </p>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>
                 {mediaError || 'Click Start to connect with a random stranger'}
               </p>
             </div>
+
             {!mediaError && (
               <button
                 onClick={handleStart}
                 className="btn-gold"
                 style={{
-                  padding: '16px 52px',
-                  borderRadius: 50,
+                  padding: '16px 52px', borderRadius: 50,
                   fontSize: 16,
                   boxShadow: '0 0 30px rgba(212,175,55,0.5)',
                   letterSpacing: '0.18em',
-                  // FIX: visually indicate loading state — never silently unresponsive
                   opacity: mediaReady ? 1 : 0.75,
                   cursor: 'pointer',
                 }}
@@ -1152,18 +1108,15 @@ willChange: 'transform',
                 {mediaReady ? '✦ START ✦' : '⏳ Starting…'}
               </button>
             )}
+
             {mediaError && (
               <button
                 onClick={() => window.location.reload()}
                 style={{
-                  padding: '14px 40px',
-                  borderRadius: 50,
+                  padding: '14px 40px', borderRadius: 50,
                   border: '1px solid rgba(212,175,55,0.4)',
-                  background: 'transparent',
-                  color: '#D4AF37',
-                  cursor: 'pointer',
-                  fontSize: 14,
-                  letterSpacing: '0.08em',
+                  background: 'transparent', color: '#D4AF37',
+                  cursor: 'pointer', fontSize: 14, letterSpacing: '0.08em',
                 }}
               >
                 Retry Permissions
@@ -1173,37 +1126,28 @@ willChange: 'transform',
         )}
       </div>
 
-      {/* ── Chat input bar + typing indicator (FIX: wrapped together so typing shows above input) ── */}
-      <div style={{
-  position: 'fixed',
-  bottom: 0,
-  left: 0,
-  width: '100%',
-  zIndex: 999,
-  background: 'rgba(10,10,10,0.95)',
-  /* FIX #5: iPhone home-indicator safe area — prevents input bar from
-     sitting on top of system UI on notched/gesture-nav iPhones */
-  paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-  boxSizing: 'border-box',
-}}>
+      {/* ── Chat input bar ───────────────────────────────────────────── */}
+      <div
+        style={{
+          position: 'fixed', bottom: 0, left: 0, width: '100%',
+          zIndex: 999,
+          background: 'rgba(10,10,10,0.95)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Typing indicator */}
         {isTyping && (
-          <div style={{
-            fontSize: 12,
-            color: 'rgba(255,255,255,0.6)',
-            fontStyle: 'italic',
-            padding: '4px 16px 0',
-          }}>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', padding: '4px 16px 0' }}>
             Stranger is typing...
           </div>
         )}
+
         <div
           style={{
             padding: '10px 12px',
             background: 'rgba(10,10,10,0.95)',
-          
-            display: 'flex',
-            gap: 8,
-            alignItems: 'center',
+            display: 'flex', gap: 8, alignItems: 'center',
             zIndex: 20,
           }}
         >
@@ -1214,24 +1158,20 @@ willChange: 'transform',
             value={inputText}
             onChange={(e) => {
               setInputText(e.target.value);
-
-              if (socketRef.current && partnerIdRef.current) {
+              // FIX: throttle typing event — only emit once per 1.5 s max
+              const now = Date.now();
+              if (socketRef.current && partnerIdRef.current && now - typingEmitRef.current > 1500) {
                 socketRef.current.emit('typing');
+                typingEmitRef.current = now;
               }
             }}
             onKeyDown={handleKeyDown}
-            placeholder={
-              status === 'connected'
-                ? 'Type a message… '
-                : 'Connect to start chatting'
-            }
+            placeholder={status === 'connected' ? 'Type a message…' : 'Connect to start chatting'}
             disabled={status !== 'connected'}
             maxLength={500}
             style={{
-              flex: 1,
-              padding: '12px 16px',
-              borderRadius: 50,
-              fontSize: 14,
+              flex: 1, padding: '12px 16px',
+              borderRadius: 50, fontSize: 14,
               opacity: status !== 'connected' ? 0.5 : 1,
             }}
           />
@@ -1240,13 +1180,8 @@ willChange: 'transform',
             disabled={status !== 'connected' || !inputText.trim()}
             className="btn-gold"
             style={{
-              width: 44,
-              height: 44,
-              borderRadius: '50%',
-              padding: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              width: 44, height: 44, borderRadius: '50%', padding: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
               opacity: (status !== 'connected' || !inputText.trim()) ? 0.4 : 1,
               cursor: (status !== 'connected' || !inputText.trim()) ? 'not-allowed' : 'pointer',
@@ -1258,27 +1193,22 @@ willChange: 'transform',
         </div>
       </div>
 
-      {/* ── Report modal ─────────────────────────────────────────────── */}
+      {/* Report modal */}
       {showReport && (
         <ReportModal onClose={() => setShowReport(false)} onSubmit={handleReport} />
       )}
 
-      {/* ── Report toast ─────────────────────────────────────────────── */}
+      {/* Report toast */}
       {reportSent && (
         <div
           style={{
-            position: 'fixed',
-            bottom: 90,
-            left: '50%',
+            position: 'fixed', bottom: 90, left: '50%',
             transform: 'translateX(-50%)',
             background: 'rgba(212,175,55,0.15)',
             border: '1px solid rgba(212,175,55,0.4)',
-            borderTop: '1px solid rgba(212,175,55,0.12)',
             color: '#D4AF37',
-            padding: '10px 24px',
-            borderRadius: 50,
-            fontSize: 13,
-            zIndex: 300,
+            padding: '10px 24px', borderRadius: 50,
+            fontSize: 13, zIndex: 300,
             backdropFilter: 'blur(12px)',
             fontFamily: '"DM Sans", sans-serif',
           }}
@@ -1287,192 +1217,12 @@ willChange: 'transform',
         </div>
       )}
 
-      {/* ── CSS keyframes ─────────────────────────────────────────────── */}
+      {/* Keyframes (component-scoped, complement globals.css) */}
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes ping {
-          75%, 100% { transform: scale(2); opacity: 0; }
-        }
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-        @keyframes orb1 {
-          0%, 100% { transform: translate(0,0) scale(1); }
-          33% { transform: translate(60px,-40px) scale(1.1); }
-          66% { transform: translate(-30px,30px) scale(0.95); }
-        }
-        @keyframes orb2 {
-          0%, 100% { transform: translate(0,0) scale(1); }
-          33% { transform: translate(-50px,60px) scale(1.05); }
-          66% { transform: translate(40px,-20px) scale(0.9); }
-        }
-        @keyframes orb3 {
-          0%, 100% { transform: translate(-50%,-50%) scale(1); }
-          50% { transform: translate(-50%,-50%) scale(1.15); }
-        }
+        @keyframes spin    { to { transform: rotate(360deg); } }
+        @keyframes ping    { 75%, 100% { transform: scale(2); opacity: 0; } }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
       `}</style>
-    </div>
-  );
-}
-
-function MobileChatOverlay({ messages }) {
-  const endRef = useRef(null);
-
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: 0,
-        top: 60,
-        bottom: 70,
-        width: '100%',
-        zIndex: 999,
-        pointerEvents: 'none',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          height: '100%',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',   // ✅ vertical
-
-          alignItems: 'flex-start',  // ✅ left
-
-          width: '100%',
-          maxWidth: '260px',
-
-          gap: 6,
-          padding: '10px 8px 12px',
-          pointerEvents: 'auto',
-
-          scrollbarWidth: 'none',   // ✅ hide scrollbar
-          msOverflowStyle: 'none',
-        }}
-      >
-        <div style={{ flex: '1 0 0' }} />
-
-        {messages.slice(-20).map((m) => (
-          <MessageBubble key={m.id} msg={m} compact />
-        ))}
-
-        <div ref={endRef} />
-      </div>
-    </div>
-  );
-}
-
-function DesktopChatOverlay({ messages }) {
-  const endRef = useRef(null);
-
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: 0,
-        bottom: 0,
-        top: 60,
-        width: '100%',
-        maxWidth: '320px',
-        zIndex: 20,
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          height: '100%',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 7,
-          padding: '12px 10px 80px',
-
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-        }}
-      >
-        <div style={{ flex: '1 0 0' }} />
-
-        {messages.slice(-20).map((m) => (
-          <MessageBubble key={m.id} msg={m} />
-        ))}
-
-        <div ref={endRef} />
-      </div>
-    </div>
-  );
-}
-
-function MessageBubble({ msg, compact }) {
-  const base = {
-    padding: compact ? '6px 10px' : '8px 12px',
-    borderRadius: 12,
-    fontSize: compact ? 12 : 13,
-    lineHeight: 1.4,
-
-    maxWidth: '75%',          // ✅ FIX
-   display: 'inline-block',   // ✅ FIX
-
-    overflowWrap: 'break-word', // ✅ FIX
-    whiteSpace: 'pre-wrap',
-
-    fontFamily: '"DM Sans", sans-serif',
-    backdropFilter: 'blur(4px)',
-  };
-
-  // SYSTEM
-  if (msg.from === 'system') {
-    return (
-      <div style={{
-        ...base,
-        alignSelf: 'center',
-        background: 'rgba(212,175,55,0.08)',
-        color: '#D4AF37',
-        fontStyle: 'italic',
-        fontSize: compact ? 11 : 12,
-        borderRadius: 20,
-      }}>
-        {msg.text}
-      </div>
-    );
-  }
-
-  // YOU (LEFT)
-  if (msg.from === 'me') {
-    return (
-      <div style={{
-        ...base,
-        alignSelf: 'flex-start', // ✅ LEFT
-        background: '#D4AF37',
-        color: '#000',
-        fontWeight: 600,
-        borderRadius: '14px',
-      }}>
-        {msg.text}
-      </div>
-    );
-  }
-
-  // STRANGER (LEFT)
-  return (
-    <div style={{
-      ...base,
-      alignSelf: 'flex-start', // ✅ LEFT
-      background: 'rgba(0,0,0,0.6)',
-      color: '#fff',
-      borderRadius: '14px',
-    }}>
-      {msg.text}
     </div>
   );
 }
