@@ -285,7 +285,7 @@ function MessageBubble({ msg, compact }) {
     fontSize: compact ? 12 : 14,
     lineHeight: 1.4,
     maxWidth: '75%',
-    display: 'inline-block', 
+   display: 'block', 
     overflowWrap: 'break-word',
     whiteSpace: 'pre-wrap',
     fontFamily: '"DM Sans", sans-serif',
