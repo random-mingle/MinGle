@@ -71,7 +71,104 @@ const Icons = {
       <polygon points="22 2 15 22 11 13 2 9 22 2" />
     </svg>
   ),
+  Home: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  ),
 };
+
+/* ══════════════════════════════════════════════════════════════════════
+   WAITING OVERLAY
+   FIX: Was defined but never rendered anywhere — now used when
+   status === 'waiting' over the video area.
+   ══════════════════════════════════════════════════════════════════════ */
+function WaitingOverlay({ onCancel }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'rgba(10,10,10,0.92)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        zIndex: 50,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 20,
+      }}
+    >
+      {/* Spinning rings */}
+      <div style={{ position: 'relative', width: 80, height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          borderRadius: '50%',
+          border: '2px solid rgba(212,175,55,0.3)',
+          animation: 'spin 2s linear infinite',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 8,
+          borderRadius: '50%',
+          border: '2px solid rgba(212,175,55,0.15)',
+          animation: 'spin 3s linear infinite reverse',
+        }} />
+      </div>
+
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ color: '#D4AF37', fontFamily: '"Playfair Display", serif', fontSize: 20, fontWeight: 600 }}>
+          Finding your match…
+        </p>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginTop: 6, fontFamily: '"DM Sans", sans-serif' }}>
+          Connecting you with someone new
+        </p>
+      </div>
+
+      {/* Animated dots */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            style={{
+              width: 8, height: 8,
+              borderRadius: '50%',
+              background: '#D4AF37',
+              animation: `waitPulse 1.4s ease-in-out ${i * 0.2}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+
+      <button
+        onClick={onCancel}
+        style={{
+          marginTop: 8,
+          padding: '10px 28px',
+          borderRadius: 50,
+          border: '1px solid rgba(212,175,55,0.3)',
+          background: 'transparent',
+          color: 'rgba(212,175,55,0.7)',
+          cursor: 'pointer',
+          fontSize: 13,
+          fontFamily: '"DM Sans", sans-serif',
+          letterSpacing: '0.05em',
+          transition: 'all 0.2s',
+        }}
+      >
+        Cancel
+      </button>
+
+      <style>{`
+        @keyframes waitPulse {
+          0%, 100% { opacity: 0.3; transform: scale(0.8); }
+          50%       { opacity: 1;   transform: scale(1.2); }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    REPORT MODAL
@@ -188,8 +285,8 @@ function MessageBubble({ msg, compact }) {
     borderRadius: 12,
     fontSize: compact ? 12 : 13,
     lineHeight: 1.4,
-    maxWidth: 'fit-content',
-    display: 'block',
+     maxWidth: 'fit-content',
+  display: 'block',
     overflowWrap: 'break-word',
     whiteSpace: 'pre-wrap',
     fontFamily: '"DM Sans", sans-serif',
@@ -242,7 +339,7 @@ function MessageBubble({ msg, compact }) {
 }
 
 /* ── Mobile chat overlay ────────────────────────────────────────────── */
-function MobileChatOverlay({ messages, keyboardHeight = 0, showControls = false }) {
+function MobileChatOverlay({ messages, keyboardHeight = 0 }) {
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -258,8 +355,6 @@ function MobileChatOverlay({ messages, keyboardHeight = 0, showControls = false 
         zIndex: 999,
         pointerEvents: 'none',
         overflow: 'hidden',
-        opacity: showControls ? 1 : 0,
-        transition: 'opacity 0.3s',
       }}
     >
       <div
@@ -273,15 +368,15 @@ function MobileChatOverlay({ messages, keyboardHeight = 0, showControls = false 
           maxWidth: '260px',
           gap: 6,
           padding: '10px 8px 12px',
-          pointerEvents: showControls ? 'auto' : 'none',
+          pointerEvents: 'auto',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
         }}
       >
         <div style={{ flex: '1 0 0' }} />
-        {messages.slice(-20).map((m) => (
-          <MessageBubble key={m.id} msg={m} compact />
-        ))}
+ {messages.slice(-20).map((m) => (
+  <MessageBubble key={m.id} msg={m} compact />
+))}
         <div ref={endRef} />
       </div>
     </div>
@@ -473,22 +568,22 @@ export default function ChatRoom() {
 
   /* ── Socket ─────────────────────────────────────────────────────── */
   const initSocket = () => {
-    const socket = io(BACKEND, {
-      transports: ['polling', 'websocket'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      timeout: 20000,
-      forceNew: true,
-      upgrade: true,
-    });
+const socket = io(BACKEND, {
+  transports: ['polling', 'websocket'],  // 🔥 correct order
+  reconnection: true,
+  reconnectionAttempts: 5,
+  timeout: 20000,
+  forceNew: true,
+  upgrade: true,  // 🔥 add this
+});
     socketRef.current = socket;
 
-    socket.on('connect', () => console.log('[Socket] connected:', socket.id));
+    socket.on('connect',    () => console.log('[Socket] connected:', socket.id));
     socket.on('disconnect', () => console.log('[Socket] disconnected'));
 
     socket.on('connect_error', (err) => {
-      console.log('Socket error:', err.message);
-    });
+  console.log('Socket error:', err.message);
+});
 
     socket.on('online_count', (n) => setOnlineCount(n));
 
@@ -650,7 +745,7 @@ export default function ChatRoom() {
   /* ── Controls ───────────────────────────────────────────────────── */
   const handleStart = () => {
     socketRef.current?.emit('find_match');
-    setMessages([{ text: '🔎 Finding a stranger...', from: 'system', id: `sys-${Date.now()}` }]);
+    setMessages([]);
     setStatus('waiting');
   };
 
@@ -662,6 +757,12 @@ export default function ChatRoom() {
     setStatus('waiting');
     addSysMsg('🔎 Finding new stranger...');
     socketRef.current?.emit('find_match');
+  };
+
+  const handleCancelWaiting = () => {
+    socketRef.current?.emit('next');
+    setStatus('idle');
+    setMessages([]);
   };
 
   const handleMute = () => {
@@ -709,12 +810,12 @@ export default function ChatRoom() {
   };
 
   // ── Mobile controls auto-show / auto-hide ───────────────────────────
-  // Tap anywhere on the video area → show Mute/VidOff/Report/Chat for 2 s, then hide.
+  // Tap anywhere on the video area → show Mute/VidOff/Report for 3 s, then hide.
   // NEXT button is always visible and is NOT affected by this logic.
   const handleScreenTouch = () => {
     setShowControls(true);
     clearTimeout(controlsTimerRef.current);
-    controlsTimerRef.current = setTimeout(() => setShowControls(false), 2000);
+    controlsTimerRef.current = setTimeout(() => setShowControls(false), 3000);
   };
 
   /* ── Control buttons config ─────────────────────────────────────── */
@@ -790,31 +891,30 @@ export default function ChatRoom() {
           zIndex: 10,
         }}
       >
-   {/* Logo */}
-<button
-  onClick={() => router.push('/')}
-  style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    padding: '4px 8px',
-    borderRadius: 8,
-    transition: 'background 0.2s',
-  }}
-  title="Back to home"
->
-  <img
-    src="/logo.png"
-    alt="MinGle"
-    style={{
-      height: 54,
-      objectFit: 'contain'
-    }}
-  />
-</button>
+        {/* Logo */}
+        <button
+          onClick={() => router.push('/')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            padding: '4px 8px', borderRadius: 8, transition: 'background 0.2s',
+          }}
+          title="Back to home"
+        >
+          <span
+            style={{
+              fontFamily: '"Playfair Display", serif',
+              fontSize: 20,
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #FFD700, #D4AF37, #B8860B)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            Mingle
+          </span>
+        </button>
 
         {/* Ad space */}
         <div
@@ -852,11 +952,34 @@ export default function ChatRoom() {
       {/* ── Main area ───────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
 
+        {/* Center logo when connected */}
+        {status === 'connected' && (
+          <div
+            style={{
+              position: 'absolute',
+              top: isMobile ? '5%' : '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 999,
+              pointerEvents: 'auto',
+            }}
+          >
+            {!isMobile && (
+              <img src="/logo.png" style={{ width: '100px', opacity: 0.9 }} alt="Mingle" />
+            )}
+            {isMobile && (
+              <div style={{ position: 'relative', width: 120, height: 50 }}>
+                <img src="/logo.png" style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', clipPath: 'inset(0 0 50% 0)' }} alt="" />
+                <img src="/logo.png" style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', clipPath: 'inset(50% 0 0 0)' }} alt="" />
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── MOBILE layout ─────────────────────────────────────────── */}
         {isMobile ? (
           <div
             style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}
-            onClick={handleScreenTouch}
             onTouchStart={handleScreenTouch}
           >
 
@@ -883,25 +1006,6 @@ export default function ChatRoom() {
                   </span>
                 </div>
               )}
-              {/* Logo at bottom-left of stranger video */}
-              <div style={{
-                position: 'absolute',
-                bottom: 10,
-                left: 10,
-                zIndex: 10,
-                pointerEvents: 'none',
-              }}>
-                <img
-                  src="/logo.png"
-                  alt="MinGle"
-                  style={{
-                    height: 28,
-                    objectFit: 'contain',
-                    opacity: 0.75,
-                    filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.7))',
-                  }}
-                />
-              </div>
             </div>
 
             {/* Self video — bottom half */}
@@ -929,7 +1033,7 @@ export default function ChatRoom() {
             </div>
 
             {/* Chat overlay */}
-            <MobileChatOverlay messages={messages} keyboardHeight={keyboardHeight} showControls={showControls} />
+            <MobileChatOverlay messages={messages} keyboardHeight={keyboardHeight} />
 
             {/* NEXT button — always visible at bottom-right, never hides */}
             <div
@@ -950,7 +1054,7 @@ export default function ChatRoom() {
               </button>
             </div>
 
-            {/* Mute / VidOff / Report — show on touch, auto-hide after 2 s */}
+            {/* Mute / VidOff / Report — show on touch, auto-hide after 3 s */}
             <div
               style={{
                 position: 'fixed',
@@ -975,95 +1079,79 @@ export default function ChatRoom() {
                   </button>
                 ))}
             </div>
+
+            {/* FIX: WaitingOverlay now actually rendered for mobile waiting state */}
+            {status === 'waiting' && <WaitingOverlay onCancel={handleCancelWaiting} />}
           </div>
 
         ) : (
           /* ── DESKTOP layout ───────────────────────────────────────── */
           <div style={{ width: '100%', height: '100%', display: 'flex', position: 'relative', overflow: 'hidden' }}>
 
-  {/* Left: Stranger video */}
-  <div style={{ flex: 1, position: 'relative', background: '#111', overflow: 'hidden', marginRight: '-1px' }}>
-    
-    <video
-      ref={remoteVideoRef}
-      autoPlay
-      playsInline
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        display: 'block',
-        transform: 'scaleX(-1) translateZ(0)',
-        backfaceVisibility: 'hidden',
-        WebkitBackfaceVisibility: 'hidden',
-        willChange: 'transform',
-      }}
-    />
+            {/* Left: Stranger video */}
+            <div style={{ flex: 1, position: 'relative', background: '#111', overflow: 'hidden', marginRight: '-1px' }}>
+              <video
+                ref={remoteVideoRef}
+                autoPlay
+                playsInline
+                style={{
+                  width: '100%', height: '100%',
+                  objectFit: 'cover', display: 'block',
+                  transform: 'scaleX(-1) translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  willChange: 'transform',
+                }}
+              />
+              {status !== 'connected' && (
+                <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
+                  <span style={{ fontSize: 64, opacity: 0.1 }}>👤</span>
+                  <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>
+                    {status === 'waiting' ? 'Finding a match…' : 'Press Start to begin'}
+                  </span>
+                </div>
+              )}
+              <DesktopChatOverlay messages={messages} />
 
-    {/* Placeholder when not connected */}
-    {status !== 'connected' && status !== 'waiting' && (
-      <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
-        <span style={{ fontSize: 64, opacity: 0.1 }}>👤</span>
-        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>
-          Press Start to begin
-        </span>
-      </div>
-    )}
+              {/* FIX: WaitingOverlay now actually rendered for desktop waiting state */}
+              {status === 'waiting' && <WaitingOverlay onCancel={handleCancelWaiting} />}
+            </div>
 
-    <DesktopChatOverlay messages={messages} />
-  </div>
+            {/* Right: Self video */}
+            <div style={{ flex: 1, position: 'relative', background: '#0e0e0e', overflow: 'hidden', marginLeft: '-1px' }}>
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{
+                  width: '100%', height: '100%',
+                  objectFit: 'cover', backgroundColor: '#000', display: 'block',
+                  transform: 'scaleX(-1) translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  willChange: 'transform',
+                  filter: isVideoOff ? 'brightness(0)' : 'none',
+                }}
+              />
+              {isVideoOff && (
+                <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
+                  <span style={{ fontSize: 52, opacity: 0.2 }}>🎥</span>
+                  <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>Camera off</span>
+                </div>
+              )}
 
-
-  {/* Right: Self video */}
-  <div style={{ flex: 1, position: 'relative', background: '#0e0e0e', overflow: 'hidden', marginLeft: '-1px' }}>
-    
-    <video
-      ref={localVideoRef}
-      autoPlay
-      playsInline
-      muted
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        backgroundColor: '#000',
-        display: 'block',
-        transform: 'scaleX(-1) translateZ(0)',
-        backfaceVisibility: 'hidden',
-        WebkitBackfaceVisibility: 'hidden',
-        willChange: 'transform',
-        filter: isVideoOff ? 'brightness(0)' : 'none',
-      }}
-    />
-
-    {isVideoOff && (
-      <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
-        <span style={{ fontSize: 52, opacity: 0.2 }}>🎥</span>
-        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>Camera off</span>
-      </div>
-    )}
-
-    {/* Control buttons */}
-    <div style={{
-      position: 'absolute',
-      right: 14,
-      top: '50%',
-      transform: 'translateY(-50%)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 10,
-      zIndex: 30
-    }}>
-      {controls.map((c) => (
-        <button key={c.key} onClick={c.onClick} className={c.className} title={c.title}>
-          {c.icon}
-          <span>{c.label}</span>
-        </button>
-      ))}
-    </div>
-  </div>
-
-</div>
+              {/* Control buttons */}
+              <div style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 10, zIndex: 30 }}>
+                {controls.map((c) => (
+                  <button key={c.key} onClick={c.onClick} className={c.className} title={c.title}>
+                    {c.icon}
+                    <span>{c.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
 
         {/* ── Idle overlay (START screen) ───────────────────────────── */}
@@ -1232,7 +1320,6 @@ export default function ChatRoom() {
         @keyframes ping    { 75%, 100% { transform: scale(2); opacity: 0; } }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
       `}</style>
-      
     </div>
   );
 }
