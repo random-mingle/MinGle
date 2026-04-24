@@ -339,7 +339,7 @@ function MessageBubble({ msg, compact }) {
 }
 
 /* ── Mobile chat overlay ────────────────────────────────────────────── */
-function MobileChatOverlay({ messages, keyboardHeight = 0 }) {
+function MobileChatOverlay({ messages, keyboardHeight = 0, showControls = false }) {
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -355,6 +355,8 @@ function MobileChatOverlay({ messages, keyboardHeight = 0 }) {
         zIndex: 999,
         pointerEvents: 'none',
         overflow: 'hidden',
+        opacity: showControls ? 1 : 0,
+        transition: 'opacity 0.3s',
       }}
     >
       <div
@@ -745,7 +747,7 @@ const socket = io(BACKEND, {
   /* ── Controls ───────────────────────────────────────────────────── */
   const handleStart = () => {
     socketRef.current?.emit('find_match');
-    setMessages([]);
+    setMessages([{ text: '🔎 Finding a stranger...', from: 'system', id: `sys-${Date.now()}` }]);
     setStatus('waiting');
   };
 
@@ -815,7 +817,7 @@ const socket = io(BACKEND, {
   const handleScreenTouch = () => {
     setShowControls(true);
     clearTimeout(controlsTimerRef.current);
-    controlsTimerRef.current = setTimeout(() => setShowControls(false), 3000);
+    controlsTimerRef.current = setTimeout(() => setShowControls(false), 2000);
   };
 
   /* ── Control buttons config ─────────────────────────────────────── */
@@ -911,7 +913,7 @@ const socket = io(BACKEND, {
     src="/logo.png"
     alt="MinGle"
     style={{
-      height: 44,
+      height: 54,
       objectFit: 'contain'
     }}
   />
@@ -953,30 +955,6 @@ const socket = io(BACKEND, {
       {/* ── Main area ───────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
 
-        {/* Center logo when connected */}
-        {status === 'connected' && (
-          <div
-            style={{
-              position: 'absolute',
-              top: isMobile ? '5%' : '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 999,
-              pointerEvents: 'auto',
-            }}
-          >
-            {!isMobile && (
-              <img src="/logo.png" style={{ width: '100px', opacity: 0.9 }} alt="Mingle" />
-            )}
-            {isMobile && (
-              <div style={{ position: 'relative', width: 120, height: 50 }}>
-                <img src="/logo.png" style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', clipPath: 'inset(0 0 50% 0)' }} alt="" />
-                <img src="/logo.png" style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', clipPath: 'inset(50% 0 0 0)' }} alt="" />
-              </div>
-            )}
-          </div>
-        )}
-
         {/* ── MOBILE layout ─────────────────────────────────────────── */}
         {isMobile ? (
           <div
@@ -1008,6 +986,25 @@ onTouchStart={handleScreenTouch}
                   </span>
                 </div>
               )}
+              {/* Logo at bottom-left of stranger video */}
+              <div style={{
+                position: 'absolute',
+                bottom: 10,
+                left: 10,
+                zIndex: 10,
+                pointerEvents: 'none',
+              }}>
+                <img
+                  src="/logo.png"
+                  alt="MinGle"
+                  style={{
+                    height: 28,
+                    objectFit: 'contain',
+                    opacity: 0.75,
+                    filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.7))',
+                  }}
+                />
+              </div>
             </div>
 
             {/* Self video — bottom half */}
@@ -1035,7 +1032,7 @@ onTouchStart={handleScreenTouch}
             </div>
 
             {/* Chat overlay */}
-            <MobileChatOverlay messages={messages} keyboardHeight={keyboardHeight} />
+            <MobileChatOverlay messages={messages} keyboardHeight={keyboardHeight} showControls={showControls} />
 
             {/* NEXT button — always visible at bottom-right, never hides */}
             <div
@@ -1081,10 +1078,7 @@ onTouchStart={handleScreenTouch}
                   </button>
                 ))}
             </div>
-{status === 'waiting' && (
-  <WaitingOverlay onCancel={handleCancelWaiting} />
-)}
-            {/* FIX: WaitingOverlay now actually rendered for mobile waiting state */}
+            {/* FIX: WaitingOverlay removed — system chat msg handles waiting state */}
 
           </div>
 
@@ -1110,38 +1104,6 @@ onTouchStart={handleScreenTouch}
         willChange: 'transform',
       }}
     />
-
-    {/* 🔥 SPINNER LOADER */}
-    {status === 'waiting' && (
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        color: '#D4AF37',
-        fontSize: 14,
-        background: 'rgba(0,0,0,0.6)',
-        padding: '14px 22px',
-        borderRadius: 20,
-        backdropFilter: 'blur(6px)',
-        zIndex: 20
-      }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-          
-          <div style={{
-            width: 42,
-            height: 42,
-            border: '3px solid rgba(212,175,55,0.3)',
-            borderTop: '3px solid #D4AF37',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite'
-          }} />
-
-          <div>Finding stranger...</div>
-
-        </div>
-      </div>
-    )}
 
     {/* Placeholder when not connected */}
     {status !== 'connected' && status !== 'waiting' && (
