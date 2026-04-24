@@ -349,7 +349,7 @@ function MobileChatOverlay({ messages, keyboardHeight = 0 }) {
   return (
     <div
       style={{
-        position: 'absolute',
+        position: 'fixed',
         left: 0, top: 60, bottom: 80 + keyboardHeight,
         width: '100%',
         zIndex: 999,
@@ -363,7 +363,6 @@ function MobileChatOverlay({ messages, keyboardHeight = 0 }) {
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          direction: 'rtl', 
           alignItems: 'flex-start',
           width: '100%',
           maxWidth: '260px',
@@ -375,11 +374,9 @@ function MobileChatOverlay({ messages, keyboardHeight = 0 }) {
         }}
       >
         <div style={{ flex: '1 0 0' }} />
-       <div style={{ direction: 'ltr', width: '100%' }}>
-  {messages.slice(-20).map((m) => (
-    <MessageBubble key={m.id} msg={m} compact />
-  ))}
-</div>
+ {messages.slice(-20).map((m) => (
+  <MessageBubble key={m.id} msg={m} compact />
+))}
         <div ref={endRef} />
       </div>
     </div>
