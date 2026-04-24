@@ -891,30 +891,31 @@ const socket = io(BACKEND, {
           zIndex: 10,
         }}
       >
-        {/* Logo */}
-        <button
-          onClick={() => router.push('/')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            padding: '4px 8px', borderRadius: 8, transition: 'background 0.2s',
-          }}
-          title="Back to home"
-        >
-          <span
-            style={{
-              fontFamily: '"Playfair Display", serif',
-              fontSize: 20,
-              fontWeight: 700,
-              background: 'linear-gradient(135deg, #FFD700, #D4AF37, #B8860B)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            Mingle
-          </span>
-        </button>
+   {/* Logo */}
+<button
+  onClick={() => router.push('/')}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '4px 8px',
+    borderRadius: 8,
+    transition: 'background 0.2s',
+  }}
+  title="Back to home"
+>
+  <img
+    src="/logo.png"
+    alt="MinGle"
+    style={{
+      height: 44,
+      objectFit: 'contain'
+    }}
+  />
+</button>
 
         {/* Ad space */}
         <div
@@ -980,7 +981,8 @@ const socket = io(BACKEND, {
         {isMobile ? (
           <div
             style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}
-            onTouchStart={handleScreenTouch}
+            onClick={handleScreenTouch}
+onTouchStart={handleScreenTouch}
           >
 
             {/* Stranger video — top half */}
@@ -1081,77 +1083,128 @@ const socket = io(BACKEND, {
             </div>
 
             {/* FIX: WaitingOverlay now actually rendered for mobile waiting state */}
-            {status === 'waiting' && <WaitingOverlay onCancel={handleCancelWaiting} />}
+
           </div>
 
         ) : (
-          /* ── DESKTOP layout ───────────────────────────────────────── */
-          <div style={{ width: '100%', height: '100%', display: 'flex', position: 'relative', overflow: 'hidden' }}>
+         /* ── DESKTOP layout ───────────────────────────────────────── */
+<div style={{ width: '100%', height: '100%', display: 'flex', position: 'relative', overflow: 'hidden' }}>
 
-            {/* Left: Stranger video */}
-            <div style={{ flex: 1, position: 'relative', background: '#111', overflow: 'hidden', marginRight: '-1px' }}>
-              <video
-                ref={remoteVideoRef}
-                autoPlay
-                playsInline
-                style={{
-                  width: '100%', height: '100%',
-                  objectFit: 'cover', display: 'block',
-                  transform: 'scaleX(-1) translateZ(0)',
-                  backfaceVisibility: 'hidden',
-                  WebkitBackfaceVisibility: 'hidden',
-                  willChange: 'transform',
-                }}
-              />
-              {status !== 'connected' && (
-                <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
-                  <span style={{ fontSize: 64, opacity: 0.1 }}>👤</span>
-                  <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>
-                    {status === 'waiting' ? 'Finding a match…' : 'Press Start to begin'}
-                  </span>
-                </div>
-              )}
-              <DesktopChatOverlay messages={messages} />
+  {/* Left: Stranger video */}
+  <div style={{ flex: 1, position: 'relative', background: '#111', overflow: 'hidden', marginRight: '-1px' }}>
+    
+    <video
+      ref={remoteVideoRef}
+      autoPlay
+      playsInline
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        display: 'block',
+        transform: 'scaleX(-1) translateZ(0)',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        willChange: 'transform',
+      }}
+    />
 
-              {/* FIX: WaitingOverlay now actually rendered for desktop waiting state */}
-              {status === 'waiting' && <WaitingOverlay onCancel={handleCancelWaiting} />}
-            </div>
+    {/* 🔥 SPINNER LOADER */}
+    {status === 'waiting' && (
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        color: '#D4AF37',
+        fontSize: 14,
+        background: 'rgba(0,0,0,0.6)',
+        padding: '14px 22px',
+        borderRadius: 20,
+        backdropFilter: 'blur(6px)',
+        zIndex: 20
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+          
+          <div style={{
+            width: 42,
+            height: 42,
+            border: '3px solid rgba(212,175,55,0.3)',
+            borderTop: '3px solid #D4AF37',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
 
-            {/* Right: Self video */}
-            <div style={{ flex: 1, position: 'relative', background: '#0e0e0e', overflow: 'hidden', marginLeft: '-1px' }}>
-              <video
-                ref={localVideoRef}
-                autoPlay
-                playsInline
-                muted
-                style={{
-                  width: '100%', height: '100%',
-                  objectFit: 'cover', backgroundColor: '#000', display: 'block',
-                  transform: 'scaleX(-1) translateZ(0)',
-                  backfaceVisibility: 'hidden',
-                  WebkitBackfaceVisibility: 'hidden',
-                  willChange: 'transform',
-                  filter: isVideoOff ? 'brightness(0)' : 'none',
-                }}
-              />
-              {isVideoOff && (
-                <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
-                  <span style={{ fontSize: 52, opacity: 0.2 }}>🎥</span>
-                  <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>Camera off</span>
-                </div>
-              )}
+          <div>Finding stranger...</div>
 
-              {/* Control buttons */}
-              <div style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 10, zIndex: 30 }}>
-                {controls.map((c) => (
-                  <button key={c.key} onClick={c.onClick} className={c.className} title={c.title}>
-                    {c.icon}
-                    <span>{c.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Placeholder when not connected */}
+    {status !== 'connected' && status !== 'waiting' && (
+      <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
+        <span style={{ fontSize: 64, opacity: 0.1 }}>👤</span>
+        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>
+          Press Start to begin
+        </span>
+      </div>
+    )}
+
+    <DesktopChatOverlay messages={messages} />
+  </div>
+
+
+  {/* Right: Self video */}
+  <div style={{ flex: 1, position: 'relative', background: '#0e0e0e', overflow: 'hidden', marginLeft: '-1px' }}>
+    
+    <video
+      ref={localVideoRef}
+      autoPlay
+      playsInline
+      muted
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        backgroundColor: '#000',
+        display: 'block',
+        transform: 'scaleX(-1) translateZ(0)',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        willChange: 'transform',
+        filter: isVideoOff ? 'brightness(0)' : 'none',
+      }}
+    />
+
+    {isVideoOff && (
+      <div className="video-placeholder" style={{ position: 'absolute', inset: 0 }}>
+        <span style={{ fontSize: 52, opacity: 0.2 }}>🎥</span>
+        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>Camera off</span>
+      </div>
+    )}
+
+    {/* Control buttons */}
+    <div style={{
+      position: 'absolute',
+      right: 14,
+      top: '50%',
+      transform: 'translateY(-50%)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10,
+      zIndex: 30
+    }}>
+      {controls.map((c) => (
+        <button key={c.key} onClick={c.onClick} className={c.className} title={c.title}>
+          {c.icon}
+          <span>{c.label}</span>
+        </button>
+      ))}
+    </div>
+  </div>
+
+</div>
         )}
 
         {/* ── Idle overlay (START screen) ───────────────────────────── */}
@@ -1320,6 +1373,7 @@ const socket = io(BACKEND, {
         @keyframes ping    { 75%, 100% { transform: scale(2); opacity: 0; } }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
       `}</style>
+      
     </div>
   );
 }
