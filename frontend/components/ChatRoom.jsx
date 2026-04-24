@@ -286,8 +286,6 @@ function MessageBubble({ msg, compact }) {
     lineHeight: 1.4,
     maxWidth: '75%',
     display: 'inline-block', 
-    display: 'inline-block',   // 🔥 main fix
-    width: 'fit-content',      // 🔥 exact text size
     overflowWrap: 'break-word',
     whiteSpace: 'pre-wrap',
     fontFamily: '"DM Sans", sans-serif',
