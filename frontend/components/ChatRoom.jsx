@@ -339,7 +339,7 @@ function MessageBubble({ msg, compact }) {
 }
 
 /* ── Mobile chat overlay ────────────────────────────────────────────── */
-function MobileChatOverlay({ messages }) {
+function MobileChatOverlay({ messages, keyboardHeight = 0 }) {
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -350,7 +350,7 @@ function MobileChatOverlay({ messages }) {
     <div
       style={{
         position: 'absolute',
-        left: 0, top: 60, bottom: 70,
+        left: 0, top: 60, bottom: 80 + keyboardHeight,
         width: '100%',
         zIndex: 999,
         pointerEvents: 'none',
@@ -434,21 +434,28 @@ export default function ChatRoom() {
   const router = useRouter();
 
   // ── Mobile viewport height fix ─────────────────────────────────────
-  // FIX: was at column-0 indentation — moved inside component properly
-
+  // FIX: Only update --vh on orientation/width change, NOT on keyboard open.
+  // Keyboard open only changes innerHeight — if we update --vh then, the video
+  // area shrinks and stranger video scrolls off screen. By ignoring height-only
+  // resize events (keyboard), both videos stay locked in their original positions.
   useEffect(() => {
-  const setVH = () => {
-    const vh = window.visualViewport?.height || window.innerHeight;
-    document.documentElement.style.setProperty('--vh', `${vh * 0.01}px`);
-  };
-
-  setVH();
-
-  window.visualViewport?.addEventListener('resize', setVH);
-  return () => {
-    window.visualViewport?.removeEventListener('resize', setVH);
-  };
-}, []);
+    if (typeof window === 'undefined') return;
+    const setVH = () => {
+      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    };
+    setVH();
+    let prevWidth = window.innerWidth;
+    const onResize = () => {
+      // Only update when width changes (orientation flip), not when only
+      // height changes (keyboard open/close).
+      if (window.innerWidth !== prevWidth) {
+        prevWidth = window.innerWidth;
+        setVH();
+      }
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // ── State ──────────────────────────────────────────────────────────
   const [status, setStatus]           = useState('idle'); // idle | waiting | connected
@@ -463,6 +470,9 @@ export default function ChatRoom() {
   const [mediaReady, setMediaReady]   = useState(false);
   const [mediaError, setMediaError]   = useState('');
   const [isTyping, setIsTyping]       = useState(false);
+  // Tracks how many px the keyboard is covering at the bottom of the screen.
+  // Used to lift the chat input above the keyboard without reflowing the video area.
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   // ── Refs ───────────────────────────────────────────────────────────
   const socketRef             = useRef(null);
@@ -489,6 +499,27 @@ export default function ChatRoom() {
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // ── Track keyboard height via visualViewport ───────────────────────
+  // When the soft keyboard opens, visualViewport.height shrinks while
+  // window.innerHeight stays the same (because --vh is no longer updated).
+  // The difference tells us how tall the keyboard is so we can lift only
+  // the chat input bar — the videos themselves never move.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+    const update = () => {
+      const vv = window.visualViewport;
+      const kbHeight = window.innerHeight - vv.height - vv.offsetTop;
+      setKeyboardHeight(Math.max(0, kbHeight));
+    };
+    window.visualViewport.addEventListener('resize', update);
+    window.visualViewport.addEventListener('scroll', update);
+    update();
+    return () => {
+      window.visualViewport?.removeEventListener('resize', update);
+      window.visualViewport?.removeEventListener('scroll', update);
+    };
   }, []);
 
   // ── Scroll to bottom on new messages ──────────────────────────────
@@ -990,7 +1021,7 @@ const socket = io(BACKEND, {
             </div>
 
             {/* Chat overlay */}
-            <MobileChatOverlay messages={messages} />
+            <MobileChatOverlay messages={messages} keyboardHeight={keyboardHeight} />
 
             {/* Control buttons */}
             <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 8, zIndex: 30 }}>
@@ -1143,17 +1174,17 @@ const socket = io(BACKEND, {
       </div>
 
       {/* ── Chat input bar ───────────────────────────────────────────── */}
+      {/* FIX: `bottom` uses keyboardHeight so the bar lifts above the keyboard
+          without pushing the video area. Videos stay completely stationary. */}
       <div
-     style={{
-  position: 'fixed',   // 🔥 main fix
-  bottom: 'env(safe-area-inset-bottom, 0px)',
-  left: 0,
-  width: '100%',
-  zIndex: 999,
-  background: 'rgba(10,10,10,0.95)',
-  paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-  boxSizing: 'border-box',
-}}
+        style={{
+         position: 'fixed', bottom: keyboardHeight, left: 0, width: '100%',
+          zIndex: 999,
+          background: 'rgba(10,10,10,0.95)',
+          paddingBottom: keyboardHeight > 0 ? 0 : 'env(safe-area-inset-bottom, 0px)',
+          boxSizing: 'border-box',
+          transition: 'bottom 0.15s ease-out',
+        }}
       >
         {/* Typing indicator */}
         {isTyping && (
