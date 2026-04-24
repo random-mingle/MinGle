@@ -285,8 +285,7 @@ function MessageBubble({ msg, compact }) {
     fontSize: compact ? 12 : 13,
     lineHeight: 1.4,
     maxWidth: '75%',
-    display: 'inline-block', 
-    width: 'fit-content',
+  display: 'block',
     overflowWrap: 'break-word',
     whiteSpace: 'pre-wrap',
     fontFamily: '"DM Sans", sans-serif',
@@ -365,7 +364,7 @@ function MobileChatOverlay({ messages }) {
           flexDirection: 'column',
           direction: 'rtl', 
           alignItems: 'flex-start',
-         width: 'fit-content',
+          width: '100%',
           maxWidth: '260px',
           gap: 6,
           padding: '10px 8px 12px',
@@ -810,7 +809,7 @@ export default function ChatRoom() {
     <div
       style={{
         width: '100%',
-        height: 'calc(var(--vh, 1vh) * 100)',
+        height: '100vh',
         background: '#0A0A0A',
         display: 'flex',
         flexDirection: 'column',
