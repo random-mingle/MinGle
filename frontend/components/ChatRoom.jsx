@@ -353,77 +353,44 @@ export default function ChatRoom() {
       background: 'linear-gradient(135deg, #f5f0ff 0%, #fdf2f8 50%, #f0f4ff 100%)',
       fontFamily: 'Nunito, sans-serif',
     }}>
- {/* ── Header ── */}
-<header style={{
-  background: 'white',
-  borderBottom: '1px solid #ede9fe',
-  padding: '8px 16px',
+      {/* ── Header ── */}
+      <header style={{
+        background: 'white',
+        borderBottom: '1px solid #ede9fe',
+        padding: '10px 20px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        position: 'sticky', top: 0, zIndex: 40,
+        boxShadow: '0 2px 12px rgba(124,58,237,0.08)',
+        marginBottom: 0,
+      }}>
+        <button onClick={() => router.push('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          <Image src="/logo.png" alt="Mingle" width={90} height={34} style={{ objectFit: 'contain' }} />
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <StatusBadge status={status} />
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: '#f5f0ff', borderRadius: 20, padding: '5px 12px',
+            fontSize: 12, fontWeight: 700, color: '#374151',
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+            <span style={{ color: '#7c3aed' }}>{onlineCount > 0 ? `${onlineCount.toLocaleString()}+` : '–'}</span>&nbsp;online
+          </div>
+        </div>
+      </header>
+
+{/* ✅ AD BANNER TOP LO */}
+<div style={{
+  width: '100%',
+  padding: '6px 10px',
   display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  position: 'sticky',
-  top: 0,
-  zIndex: 40,
-  boxShadow: '0 2px 12px rgba(124,58,237,0.08)',
+  justifyContent: 'center',
 }}>
-
-  {/* 🔹 LEFT: LOGO + AD */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-  }}>
-
-    {/* LOGO */}
-    <button
-      onClick={() => router.push('/')}
-      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-    >
-      <Image src="/logo.png" alt="Mingle" width={85} height={32} />
-    </button>
-
-    {/* 🔥 SMALL AD */}
-    <div style={{
-      transform: 'scale(0.85)',   // 🔥 size chinnaga
-      transformOrigin: 'left',
-    }}>
-      <AdBanner />
-    </div>
-
+  <div style={{ width: '100%', maxWidth: 900 }}>
+    <AdBanner />
   </div>
-
-  {/* 🔹 RIGHT SIDE */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-  }}>
-    <StatusBadge status={status} />
-
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 6,
-      background: '#f5f0ff',
-      borderRadius: 20,
-      padding: '4px 10px',
-      fontSize: 11,
-      fontWeight: 700,
-      color: '#374151',
-    }}>
-      <span style={{
-        width: 7,
-        height: 7,
-        borderRadius: '50%',
-        background: '#10b981',
-      }} />
-      <span style={{ color: '#7c3aed' }}>
-        {onlineCount > 0 ? `${onlineCount}+` : '–'}
-      </span>
-    </div>
-  </div>
-
-</header>
+</div>
 
       {/* ── Main ── */}
      <div style={{
@@ -453,60 +420,11 @@ export default function ChatRoom() {
   gridTemplateColumns: '1fr 1fr',
   gap: 16,
   width: '100%',
-  maxWidth: 1100,
+  maxWidth: 900,
+   maxHeight: '320px',
   margin: '0 auto 16px',
-   aspectRatio: '2 / 1', 
 }}>
-                    {/* Stranger video */}
-                <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden',
-                  background: '#1e1b4b', height: '100%',
-                 
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
-                }}>
-                  <video
-                    ref={remoteVideoRef}
-                    autoPlay
-                    playsInline
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  {!remoteReady && (
-                    <div style={{
-                      position: 'absolute', inset: 0, display: 'flex',
-                      flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                      color: 'white', gap: 8,
-                    }}>
-                      {status === 'waiting' ? (
-                        <>
-                          <div style={{
-                            width: 48, height: 48, borderRadius: '50%',
-                            border: '3px solid rgba(255,255,255,0.2)',
-                            borderTop: '3px solid #a78bfa',
-                            animation: 'spin 1s linear infinite',
-                          }} />
-                          <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-                          <span style={{ fontSize: 13, opacity: 0.7, fontWeight: 600 }}>Connecting...</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-                            <path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
-                          </svg>
-                          <span style={{ fontSize: 13, opacity: 0.4, fontWeight: 600 }}>Stranger</span>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  {/* Watermark */}
-                  <div style={{
-                    position: 'absolute', bottom: 10, left: 12,
-                    color: 'rgba(255,255,255,0.3)', fontSize: 13, fontWeight: 800,
-                    pointerEvents: 'none', letterSpacing: '-0.5px',
-                  }}>
-                    mingle.com
-                  </div>
-                </div>
-
-                    {/* Stranger video */}
+                {/* Stranger video */}
                 <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden',
                   background: '#1e1b4b', height: '100%',
                   boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
@@ -598,8 +516,8 @@ export default function ChatRoom() {
                     >
                       🔄 Flip
                     </button>
-                  </div> 
-                  
+                  </div>
+
                   {/* Device dropdown */}
                   {showDevices && (
                     <div className="fade-in" style={{
