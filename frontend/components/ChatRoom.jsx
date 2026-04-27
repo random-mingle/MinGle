@@ -389,13 +389,16 @@ export default function ChatRoom() {
           <div style={{ flex: 1, minWidth: 280 }}>
             {/* Video panels (only for video mode) */}
             {mode === 'video' && (
-              <div style={{
-                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10,
-                marginBottom: 12,
-              }}>
+  <div style={{
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: 10,
+  maxWidth: 640,
+  margin: '0 auto 12px',
+}}>
                 {/* Stranger video */}
                 <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden',
-                  background: '#1e1b4b', aspectRatio: '4/3',
+                  background: '#1e1b4b', aspectRatio: '5/4',
                   boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
                 }}>
                   <video
@@ -539,7 +542,7 @@ export default function ChatRoom() {
               boxShadow: '0 2px 12px rgba(124,58,237,0.08)',
               display: 'flex', flexDirection: 'column', overflow: 'hidden',
             }}>
-              
+
               {/* Messages */}
               <div style={{
                 flex: 1, overflowY: 'auto', padding: '12px 16px',
