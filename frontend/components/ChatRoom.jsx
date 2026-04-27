@@ -407,34 +407,37 @@ export default function ChatRoom() {
          *  Tap anywhere on video area to reveal Settings/Flip for 2s.
          */}
         {mode === 'video' && (
-          <div
-           onTouchStart={showControlsBriefly}
-            style={{
-              flex: 3,           // ← FIX: was 1, now videos take more space
-              display: 'flex',
-              flexDirection: isMobile ? 'column' : 'row',
-              gap: isMobile ? 4 : 8,
-              padding: isMobile ? '6px 6px 0' : '10px 10px 0',
-               alignItems: 'stretch',
-              justifyContent: 'center',   // ✅ center
-              maxWidth: 1200,             // ✅ limit width
-              margin: '0 auto',           // ✅ center align
-              width: '100%',
-              background: '#f9f7ff',         // ✅ bonus clean bg
-              borderTop: '1px solid #ede9fe', // ✅ smooth separation
+  <div
+  onClick={showControlsBriefly}
+  style={{
+    flex: 3, // ✅ IMPORTANT (height control)
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 20,
 
-              overflow: 'hidden',
-              minHeight: 0,
-            }}
-          >
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    maxWidth: 1100,
+    margin: '0 auto',
+    width: '100%',
+
+    background: '#f9f7ff',
+  }}
+>
             {/* ── Stranger ── */}
-            <div style={{
-              flex: 1, position: 'relative',
-              borderRadius: isMobile ? 10 : 14,
-              overflow: 'hidden', background: '#1a1535',
-              minHeight: 0,  
-              boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-            }}>
+   <div style={{
+  position: 'relative',
+  width: '100%',
+  maxWidth: 520,
+  aspectRatio: '16 / 10',
+
+  borderRadius: isMobile ? 10 : 14,
+  overflow: 'hidden',
+  background: '#1a1535',
+
+  boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+}}>
               <video ref={remoteVideoRef} autoPlay playsInline
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               {!remoteReady && (
@@ -459,13 +462,18 @@ export default function ChatRoom() {
             </div>
 
             {/* ── My video ── */}
-            <div style={{
-              flex: 1, position: 'relative',
-              borderRadius: isMobile ? 10 : 14,
-              overflow: 'hidden', background: '#0f1724',
-              minHeight: 0, 
-              boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-            }}>
+    <div style={{
+  position: 'relative',
+  width: '100%',
+  maxWidth: 520,
+  aspectRatio: '16 / 10',
+
+  borderRadius: isMobile ? 10 : 14,
+  overflow: 'hidden',
+  background: '#0f1724',
+
+  boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+}}>
               <video ref={localVideoRef} autoPlay playsInline muted
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: 'scaleX(-1)' }} />
               {isCamOff && (
