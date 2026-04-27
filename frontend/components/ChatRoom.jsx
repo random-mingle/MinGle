@@ -559,7 +559,7 @@ export default function ChatRoom() {
 <div
   style={{
     background: 'white',
-    flex: 1,                 // ✅ IKKADE
+    flex: 0.6,                 // ✅ IKKADE
     display: 'flex',         // ✅ IKKADE
     flexDirection: 'column', // ✅ IKKADE
     borderRadius: 16,
@@ -569,9 +569,12 @@ export default function ChatRoom() {
 
               {/* Messages */}
               <div style={{
-                flex: 1, overflowY: 'auto', padding: '12px 16px',
-                display: 'flex', flexDirection: 'column', gap: 8,
-                minHeight: 180, flex: 1,
+height: '150px',
+overflowY: 'auto',
+padding: '12px 16px',
+display: 'flex',
+flexDirection: 'column',
+gap: 8,
               }}>
                 {messages.length === 0 && (
                   <div style={{ textAlign: 'center', color: '#d1d5db', fontSize: 13, marginTop: 20 }}>
