@@ -356,7 +356,7 @@ export default function ChatRoom() {
         height: appHeight,
         display: 'flex',
         flexDirection: 'column',
-        background: '#0d0d1a',
+        background: '#ffffff',
         fontFamily: 'Nunito, sans-serif',
         overflow: 'hidden',
       }}>
@@ -419,6 +419,9 @@ export default function ChatRoom() {
               maxWidth: 1000,             // ✅ limit width
               margin: '0 auto',           // ✅ center align
               width: '100%',
+              background: '#f9f7ff',         // ✅ bonus clean bg
+              borderTop: '1px solid #ede9fe', // ✅ smooth separation
+
               overflow: 'hidden',
               minHeight: 0,
             }}
