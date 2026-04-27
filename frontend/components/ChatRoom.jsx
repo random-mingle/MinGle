@@ -415,6 +415,10 @@ export default function ChatRoom() {
               flexDirection: isMobile ? 'column' : 'row',
               gap: isMobile ? 4 : 8,
               padding: isMobile ? '6px 6px 0' : '10px 10px 0',
+              justifyContent: 'center',   // ✅ center
+              maxWidth: 1000,             // ✅ limit width
+              margin: '0 auto',           // ✅ center align
+              width: '100%',
               overflow: 'hidden',
               minHeight: 0,
             }}
