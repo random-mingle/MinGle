@@ -453,8 +453,8 @@ export default function ChatRoom() {
   gridTemplateColumns: '1fr 1fr',
   gap: 16,
   width: '100%',
-  maxWidth: 900,
-   maxHeight: '320px',
+  maxWidth: 1100,
+   height: '420px',
   margin: '0 auto 16px',
 }}>
                 {/* Stranger video */}
