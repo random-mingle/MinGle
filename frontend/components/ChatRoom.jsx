@@ -457,10 +457,10 @@ export default function ChatRoom() {
   margin: '0 auto 16px',
    aspectRatio: '2 / 1', 
 }}>
-                {/* Stranger video */}
+                    {/* Stranger video */}
                 <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden',
-                  background: '#1e1b4b', width: '100%',  
-                   aspectRatio: '3 / 4',  
+                  background: '#1e1b4b', height: '100%',
+                 
                   boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
                 }}>
                   <video
@@ -508,8 +508,8 @@ export default function ChatRoom() {
 
                 {/* Self video */}
                 <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden',
-                  background: '#111827', width: '100%',   
-                    aspectRatio: '3 / 4',
+                  background: '#111827', height: '100%',
+                 
                   boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
                 }}>
                   <video
@@ -531,17 +531,6 @@ export default function ChatRoom() {
                   <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <button
                       onClick={() => setShowDevices(!showDevices)}
-                      style={{
-                        background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: 8,
-                        padding: '4px 8px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                        color: '#7c3aed', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                        display: 'flex', alignItems: 'center', gap: 4,
-                      }}
-                    >
-                      ⚙️ Settings
-                    </button>
-                    <button
-                      onClick={flipCamera}
                       style={{
                         background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: 8,
                         padding: '4px 8px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
