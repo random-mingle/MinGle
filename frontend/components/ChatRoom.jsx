@@ -361,6 +361,7 @@ export default function ChatRoom() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         position: 'sticky', top: 0, zIndex: 40,
         boxShadow: '0 2px 12px rgba(124,58,237,0.08)',
+        marginBottom: 0,
       }}>
         <button onClick={() => router.push('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
           <Image src="/logo.png" alt="Mingle" width={90} height={34} style={{ objectFit: 'contain' }} />
@@ -380,8 +381,15 @@ export default function ChatRoom() {
       </header>
 
 {/* ✅ AD BANNER TOP LO */}
-<div style={{ margin: '10px auto', maxWidth: 900 }}>
-  <AdBanner />
+<div style={{
+  width: '100%',
+  padding: '6px 10px',
+  display: 'flex',
+  justifyContent: 'center',
+}}>
+  <div style={{ width: '100%', maxWidth: 900 }}>
+    <AdBanner />
+  </div>
 </div>
 
       {/* ── Main ── */}
