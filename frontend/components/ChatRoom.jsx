@@ -383,7 +383,6 @@ export default function ChatRoom() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 12px' }}>
         <div style={{
           display: 'flex', gap: 16, flexWrap: 'wrap',
-          '@media(maxWidth:768px)': { flexDirection: 'column' },
         }}>
 
           {/* ── Left: Video + Chat ── */}
