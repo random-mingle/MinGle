@@ -380,6 +380,11 @@ export default function ChatRoom() {
         </div>
       </header>
 
+{/* ✅ AD BANNER TOP LO */}
+<div style={{ margin: '10px auto', maxWidth: 900 }}>
+  <AdBanner />
+</div>
+
       {/* ── Main ── */}
      <div style={{
   maxWidth: 1200,
@@ -394,7 +399,6 @@ export default function ChatRoom() {
   display: 'flex',
   flexDirection: 'column',
   gap: 10,
-  height: '100%',
   height: '40%',
 }}>
 
@@ -686,8 +690,6 @@ export default function ChatRoom() {
   </button>
 </div>
 
-            {/* ── Ad Banner ── */}
-            <AdBanner />
           </div>
         </div>
       </div>
