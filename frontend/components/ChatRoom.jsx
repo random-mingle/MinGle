@@ -539,20 +539,7 @@ export default function ChatRoom() {
               boxShadow: '0 2px 12px rgba(124,58,237,0.08)',
               display: 'flex', flexDirection: 'column', overflow: 'hidden',
             }}>
-              {/* Safety notice */}
-              <div style={{
-                background: '#faf5ff', borderBottom: '1px solid #ede9fe',
-                padding: '10px 16px', display: 'flex', flexDirection: 'column', gap: 3,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 14 }}>🔞</span>
-                  <span style={{ fontSize: 12.5, fontWeight: 800, color: '#7c3aed' }}>You must be 18+</span>
-                </div>
-                <span style={{ fontSize: 12, color: '#6b7280', fontWeight: 600 }}>
-                  No nudity, hate speech, or harassment
-                </span>
-              </div>
-
+              
               {/* Messages */}
               <div style={{
                 flex: 1, overflowY: 'auto', padding: '12px 16px',
