@@ -1,165 +1,136 @@
 const express = require('express');
-const http    = require('http');
+const http = require('http');
 const { Server } = require('socket.io');
-const cors    = require('cors');
+const cors = require('cors');
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-
 const server = http.createServer(app);
+
+const ALLOWED_ORIGINS = [
+  'https://min-gle.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:3001',
+];
+
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: ALLOWED_ORIGINS,
     methods: ['GET', 'POST'],
-    credentials: false,
+    credentials: true,
   },
   transports: ['websocket', 'polling'],
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
-// ── State ─────────────────────────────────────────────────────────────
-const waitingQueue = []; // socket ids waiting for a partner
-const activePairs  = new Map(); // socketId → partnerId (both directions)
+app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
+app.use(express.json());
 
-// ── Helpers ───────────────────────────────────────────────────────────
-function removeFromQueue(socketId) {
-  const idx = waitingQueue.indexOf(socketId);
-  if (idx !== -1) waitingQueue.splice(idx, 1);
+app.get('/', (req, res) => {
+  res.json({
+    status: '🚀 Mingle Server Online',
+    users: io.engine.clientsCount,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// ── State ────────────────────────────────────────────────────────────────────
+const queues = { text: [], video: [] }; // waiting queues by mode
+const activePairs = new Map();          // socketId → partnerId
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function broadcastOnlineCount() {
+  io.emit('online-count', io.engine.clientsCount);
 }
 
-function unpair(socketId) {
+function cleanupSocket(socketId) {
+  queues.text   = queues.text.filter(s => s.id !== socketId);
+  queues.video  = queues.video.filter(s => s.id !== socketId);
+  activePairs.delete(socketId);
+}
+
+function notifyPartnerLeft(socketId) {
   const partnerId = activePairs.get(socketId);
   if (partnerId) {
+    io.to(partnerId).emit('partner-left');
     activePairs.delete(partnerId);
-    activePairs.delete(socketId);
   }
-  return partnerId;
 }
 
-function broadcastOnlineCount() {
-  io.emit('online_count', io.engine.clientsCount);
-}
-
-// ── Socket.IO ─────────────────────────────────────────────────────────
+// ── Connection Handler ────────────────────────────────────────────────────────
 io.on('connection', (socket) => {
-  console.log(`[+] Connected: ${socket.id}  (total: ${io.engine.clientsCount})`);
+  console.log(`[+] ${socket.id} connected | total: ${io.engine.clientsCount}`);
   broadcastOnlineCount();
 
-  // ── Typing indicator ────────────────────────────────────────────────
-  socket.on('typing', () => {
-    const partnerId = activePairs.get(socket.id);
-    if (partnerId) {
-      io.to(partnerId).emit('typing');
-    }
-  });
+  // ── Matchmaking ─────────────────────────────────────────────────────────
+  socket.on('find-match', ({ mode = 'video' } = {}) => {
+    // Clean up any existing session
+    notifyPartnerLeft(socket.id);
+    cleanupSocket(socket.id);
 
-  // ── Find Match ──────────────────────────────────────────────────────
-  socket.on('find_match', () => {
-    // Clean up any existing session first
-    const oldPartner = unpair(socket.id);
-    if (oldPartner) {
-      io.to(oldPartner).emit('partner_disconnected');
-    }
-    removeFromQueue(socket.id);
+    const queue = queues[mode] ?? queues.video;
 
-    // Try to match with someone in the queue
-    let matched = false;
-    while (waitingQueue.length > 0) {
-      const candidateId = waitingQueue.shift();
+    if (queue.length > 0) {
+      const partner = queue.shift();
 
-      // Skip stale entries (disconnected sockets)
-      const candidateSocket = io.sockets.sockets.get(candidateId);
-      if (!candidateSocket || !candidateSocket.connected) continue;
+      activePairs.set(socket.id, partner.id);
+      activePairs.set(partner.id, socket.id);
 
-      // Pair them
-      activePairs.set(socket.id, candidateId);
-      activePairs.set(candidateId, socket.id);
+      console.log(`[MATCH] ${socket.id} ↔ ${partner.id} [${mode}]`);
 
-      // Notify both: initiator creates the WebRTC offer
-      socket.emit('matched', { initiator: true,  partnerId: candidateId });
-      io.to(candidateId).emit('matched', { initiator: false, partnerId: socket.id });
-
-      console.log(`[~] Paired: ${socket.id} ↔ ${candidateId}`);
-      matched = true;
-      break;
-    }
-
-    if (!matched) {
-      waitingQueue.push(socket.id);
+      // Initiator (newer socket) sends the WebRTC offer
+      socket.emit('match', { role: 'initiator', partnerId: partner.id, mode });
+      partner.emit('match', { role: 'receiver',  partnerId: socket.id,  mode });
+    } else {
+      queue.push(socket);
       socket.emit('waiting');
-      console.log(`[…] Queued: ${socket.id}  (queue length: ${waitingQueue.length})`);
+      console.log(`[WAIT] ${socket.id} waiting [${mode}] queue size: ${queue.length}`);
     }
   });
 
-  // ── WebRTC Signaling Relay ──────────────────────────────────────────
-  socket.on('signal', ({ signal, to }) => {
-    if (!to) return;
-    // Only relay if they are actually paired (security check)
-    const expectedPartner = activePairs.get(socket.id);
-    if (expectedPartner !== to) return;
-
-    io.to(to).emit('signal', { signal, from: socket.id });
+  // ── WebRTC Signaling ─────────────────────────────────────────────────────
+  socket.on('offer', ({ offer, to }) => {
+    socket.to(to).emit('offer', { offer, from: socket.id });
   });
 
-  // ── Chat Messages ───────────────────────────────────────────────────
-  socket.on('message', ({ text }) => {
+  socket.on('answer', ({ answer, to }) => {
+    socket.to(to).emit('answer', { answer, from: socket.id });
+  });
+
+  socket.on('ice-candidate', ({ candidate, to }) => {
+    socket.to(to).emit('ice-candidate', { candidate, from: socket.id });
+  });
+
+  // ── Text Chat ────────────────────────────────────────────────────────────
+  socket.on('chat-message', ({ message }) => {
     const partnerId = activePairs.get(socket.id);
-    if (!partnerId) return;
-    if (!text || typeof text !== 'string' || text.trim().length === 0) return;
-
-    const sanitised = text.trim().slice(0, 500);
-    io.to(partnerId).emit('message', { text: sanitised });
-  });
-
-  // ── Next ─────────────────────────────────────────────────────────────
-  socket.on('next', () => {
-    const partnerId = unpair(socket.id);
-    if (partnerId) {
-      io.to(partnerId).emit('partner_disconnected');
-      console.log(`[→] Next: ${socket.id} left ${partnerId}`);
+    if (partnerId && message?.trim()) {
+      io.to(partnerId).emit('chat-message', {
+        message: message.trim(),
+        from: 'stranger',
+        timestamp: Date.now(),
+      });
     }
-    removeFromQueue(socket.id);
-
-    // Trigger re-queue on client (avoids recursive server emit)
-    socket.emit('find_match_trigger');
   });
 
-  // ── Report ───────────────────────────────────────────────────────────
-  socket.on('report', ({ reason }) => {
-    const partnerId = activePairs.get(socket.id);
-    console.log(`[!] Report: ${socket.id} reported ${partnerId} — reason: ${reason}`);
-    socket.emit('report_received');
+  // ── Leave / Skip ─────────────────────────────────────────────────────────
+  socket.on('leave', () => {
+    notifyPartnerLeft(socket.id);
+    cleanupSocket(socket.id);
+    console.log(`[LEAVE] ${socket.id}`);
   });
 
-  // ── Disconnect ───────────────────────────────────────────────────────
+  // ── Disconnect ───────────────────────────────────────────────────────────
   socket.on('disconnect', (reason) => {
-    console.log(`[-] Disconnected: ${socket.id}  (reason: ${reason})`);
-    const partnerId = unpair(socket.id);
-    if (partnerId) {
-      io.to(partnerId).emit('partner_disconnected');
-    }
-    removeFromQueue(socket.id);
-    broadcastOnlineCount();
-  });
-});
-app.get('/', (req, res) => {
-  res.send('Backend running ✅');
-});
-// ── Health check ──────────────────────────────────────────────────────
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    online:  io.engine.clientsCount,
-    waiting: waitingQueue.length,
-    pairs:   activePairs.size / 2,
+    notifyPartnerLeft(socket.id);
+    cleanupSocket(socket.id);
+    setTimeout(broadcastOnlineCount, 300);
+    console.log(`[-] ${socket.id} disconnected (${reason}) | total: ${io.engine.clientsCount}`);
   });
 });
 
-// ── Start ─────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 4000;
+// ── Start ────────────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-  console.log(`🚀 Mingle backend running on http://localhost:${PORT}`);
+  console.log(`\n🚀 Mingle Backend running on port ${PORT}\n`);
 });
-
-// Keep alive ping (useful on free-tier hosts that sleep)
-setInterval(() => console.log('[ping] Server alive'), 30000);

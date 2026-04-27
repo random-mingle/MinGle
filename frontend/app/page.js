@@ -1,497 +1,484 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import AdPopup from '@/components/AdPopup';
 
-/* ══════════════════════════════════════════════════════════════════════
-   AD POPUP — shows once per session, video ad with 10s forced watch
-   ══════════════════════════════════════════════════════════════════════ */
-function AdPopup({ onClose }) {
-  const [secondsLeft, setSecondsLeft] = useState(10);
-  const [canClose, setCanClose] = useState(false);
-  const videoRef = useRef(null);
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://mingle-kfcz.onrender.com';
 
-  /* Start countdown on mount */
-  useEffect(() => {
-    if (secondsLeft <= 0) {
-      setCanClose(true);
-      return;
-    }
-    const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [secondsLeft]);
+// ── Sub-components ─────────────────────────────────────────────────────────
 
-  /* Auto-play video (muted so browsers allow it) */
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    }
-  }, []);
-
+function Sparkle({ style, size = 24, color = '#f472b6' }) {
   return (
-    /* ── Backdrop ── */
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill={color}
+      style={{ position: 'absolute', ...style }}
+      className="sparkle"
+    >
+      <path d="M12 2 L13.5 9 L20 10.5 L13.5 12 L12 19 L10.5 12 L4 10.5 L10.5 9 Z" />
+    </svg>
+  );
+}
+
+function FAQItem({ question, answer, isOpen, onToggle }) {
+  return (
     <div
       style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0, 0, 0, 0.88)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        zIndex: 10000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px',
+        borderBottom: '1px solid #ede9fe',
+        padding: '14px 0',
+        cursor: 'pointer',
       }}
+      onClick={onToggle}
     >
-      {/* ── Modal ── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontWeight: 600, fontSize: 14, color: '#374151' }}>{question}</span>
+        <span
+          style={{
+            fontSize: 20,
+            color: '#7c3aed',
+            fontWeight: 300,
+            lineHeight: 1,
+            transform: isOpen ? 'rotate(45deg)' : 'none',
+            transition: 'transform 0.2s ease',
+          }}
+        >
+          +
+        </span>
+      </div>
+      {isOpen && (
+        <p
+          className="fade-in"
+          style={{
+            marginTop: 8,
+            fontSize: 13,
+            color: '#6b7280',
+            lineHeight: 1.6,
+            paddingRight: 16,
+          }}
+        >
+          {answer}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Main Page ─────────────────────────────────────────────────────────────
+
+export default function HomePage() {
+  const [mode, setMode]           = useState('video');
+  const [interests, setInterests] = useState('');
+  const [openFaq, setOpenFaq]     = useState(null);
+  const [onlineCount, setOnlineCount] = useState(0);
+  const [showAd, setShowAd]       = useState(false);
+  const router = useRouter();
+
+  // Connect socket just for online count
+  useEffect(() => {
+    let socket;
+    const init = async () => {
+      const { io } = await import('socket.io-client');
+      socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+      socket.on('online-count', (count) => setOnlineCount(count));
+    };
+    init();
+
+    // Show ad popup after 1.5 seconds
+    const timer = setTimeout(() => setShowAd(true), 1500);
+
+    return () => {
+      socket?.disconnect();
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const handleStart = () => {
+    const params = new URLSearchParams({ mode, interests });
+    router.push(`/chat?${params.toString()}`);
+  };
+
+  const faqs = [
+    {
+      q: 'How does interest matching work?',
+      a: 'Enter topics you care about and Mingle will try to connect you with someone who shares similar interests. Matching is instant and random within your interest group.',
+    },
+    {
+      q: 'How does Mingle help keep chats safe?',
+      a: 'Our moderation system monitors chats in real time. All users must agree to community guidelines before chatting. You can report and skip anyone at any time.',
+    },
+    {
+      q: 'Why choose Mingle to chat with strangers online?',
+      a: 'Mingle is completely free, requires no account, and connects you with real people from around the world instantly. It\'s the easiest way to meet new people online.',
+    },
+    {
+      q: 'Can I use Mingle on my phone?',
+      a: 'Yes! Mingle is fully optimized for mobile devices. Both text and video chat work seamlessly on Android and iOS.',
+    },
+  ];
+
+  const features = [
+    {
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        </svg>
+      ),
+      label: 'Interest Based\nMatching',
+    },
+    {
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      ),
+      label: 'Active\nModeration',
+    },
+    {
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+        </svg>
+      ),
+      label: 'Global\nCommunity',
+    },
+    {
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
+      label: 'Instant &\nAnonymous',
+    },
+  ];
+
+  return (
+    <>
+      {/* ── Ad Popup ── */}
+      {showAd && <AdPopup onClose={() => setShowAd(false)} />}
+
+      {/* ── Page Wrapper ── */}
       <div
         style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #f5f0ff 0%, #fdf2f8 50%, #f0f4ff 100%)',
           position: 'relative',
-          width: '100%',
-          maxWidth: '640px',
-          background: '#0f0f0f',
-          border: '1px solid rgba(212, 175, 55, 0.3)',
-          borderRadius: '16px',
           overflow: 'hidden',
-          boxShadow: '0 0 60px rgba(212, 175, 55, 0.15), 0 24px 48px rgba(0,0,0,0.6)',
         }}
       >
-        {/* ── Header bar ── */}
+        {/* ── Decorative Blobs ── */}
         <div
           style={{
+            position: 'fixed',
+            bottom: -60,
+            left: -60,
+            width: 200,
+            height: 200,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, #c4b5fd 0%, transparent 70%)',
+            opacity: 0.5,
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'fixed',
+            top: -40,
+            right: -40,
+            width: 160,
+            height: 160,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, #a78bfa 0%, transparent 70%)',
+            opacity: 0.4,
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* ── Sparkles ── */}
+        <Sparkle style={{ top: 80, left: '18%' }} size={22} color="#f472b6" />
+        <Sparkle style={{ top: 160, right: '22%' }} size={18} color="#c084fc" />
+        <Sparkle style={{ bottom: 120, left: '12%' }} size={28} color="#f472b6" />
+        <Sparkle style={{ bottom: 180, right: '15%' }} size={16} color="#a78bfa" />
+        <Sparkle style={{ top: '40%', left: '6%' }} size={14} color="#f472b6" />
+        <Sparkle style={{ top: '35%', right: '5%' }} size={20} color="#c084fc" />
+
+        {/* ── Header ── */}
+        <header
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 50,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '12px 16px',
-            background: 'rgba(212, 175, 55, 0.06)',
-            borderBottom: '1px solid rgba(212, 175, 55, 0.15)',
+            padding: '12px 24px',
           }}
         >
-          <span
+          <Image src="/logo.png" alt="Mingle" width={110} height={40} style={{ objectFit: 'contain' }} />
+
+          {/* Online Count */}
+          <div
             style={{
-              fontSize: '11px',
-              fontFamily: '"DM Sans", sans-serif',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: 'rgba(212, 175, 55, 0.7)',
-              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'white',
+              borderRadius: 20,
+              padding: '6px 14px',
+              boxShadow: '0 2px 12px rgba(124,58,237,0.15)',
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#374151',
             }}
           >
-            Advertisement
-          </span>
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: '#10b981',
+                display: 'inline-block',
+                boxShadow: '0 0 0 3px rgba(16,185,129,0.2)',
+              }}
+            />
+            <span style={{ color: '#7c3aed' }}>
+              {onlineCount > 0 ? `${onlineCount.toLocaleString()}+` : '—'}
+            </span>
+            &nbsp;online
+          </div>
+        </header>
 
-          {/* Close button — disabled for first 10 s */}
-          {canClose ? (
+        {/* ── Main Content ── */}
+        <main
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+            padding: '90px 16px 40px',
+          }}
+        >
+          {/* ── Card ── */}
+          <div
+            className="fade-in-up"
+            style={{
+              background: 'white',
+              borderRadius: 20,
+              boxShadow: '0 4px 40px rgba(124,58,237,0.10), 0 1px 3px rgba(0,0,0,0.06)',
+              padding: '40px 44px',
+              width: '100%',
+              maxWidth: 560,
+            }}
+          >
+            {/* Heading */}
+            <h1
+              style={{
+                textAlign: 'center',
+                fontSize: 28,
+                fontWeight: 800,
+                color: '#1e1b4b',
+                marginBottom: 10,
+                letterSpacing: '-0.5px',
+              }}
+            >
+              Chat with Strangers
+            </h1>
+            <p style={{ textAlign: 'center', color: '#6b7280', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
+              Ready to meet someone new? Mingle makes it easy to chat with strangers
+              in random video or text chats. It&apos;s simple, fast, and time to start mingling!
+            </p>
+
+            {/* Mode Toggle */}
+            <p style={{ textAlign: 'center', fontSize: 13, color: '#6b7280', marginBottom: 10, fontWeight: 600 }}>
+              Start chatting
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <button
+                onClick={() => setMode('text')}
+                style={{
+                  padding: '10px 36px',
+                  borderRadius: 10,
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: 15,
+                  fontFamily: 'inherit',
+                  background: mode === 'text' ? '#7c3aed' : '#ede9fe',
+                  color: mode === 'text' ? 'white' : '#7c3aed',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Text
+              </button>
+              <span style={{ color: '#9ca3af', fontSize: 13 }}>or</span>
+              <button
+                onClick={() => setMode('video')}
+                style={{
+                  padding: '10px 36px',
+                  borderRadius: 10,
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: 15,
+                  fontFamily: 'inherit',
+                  background: mode === 'video' ? '#7c3aed' : '#ede9fe',
+                  color: mode === 'video' ? 'white' : '#7c3aed',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Video
+              </button>
+            </div>
+
+            {/* Interests */}
+            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 8, fontWeight: 600 }}>
+              What do you want to talk about?
+            </p>
+            <input
+              type="text"
+              placeholder="Add your interests (optional)"
+              value={interests}
+              onChange={(e) => setInterests(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleStart()}
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: 10,
+                border: '1.5px solid #ede9fe',
+                fontSize: 14,
+                fontFamily: 'inherit',
+                color: '#374151',
+                outline: 'none',
+                marginBottom: 14,
+                background: '#fafafa',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = '#a78bfa')}
+              onBlur={(e) => (e.target.style.borderColor = '#ede9fe')}
+            />
+
+            {/* Start Button */}
             <button
-              onClick={onClose}
+              onClick={handleStart}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: 10,
+                border: 'none',
+                background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+                color: 'white',
+                fontWeight: 800,
+                fontSize: 16,
+                fontFamily: 'inherit',
+                cursor: 'pointer',
+                marginBottom: 14,
+                boxShadow: '0 4px 16px rgba(124,58,237,0.35)',
+                transition: 'transform 0.15s, box-shadow 0.15s',
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 6px 20px rgba(124,58,237,0.45)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 16px rgba(124,58,237,0.35)';
+              }}
+            >
+              Start {mode === 'video' ? '📹' : '💬'} Chat
+            </button>
+
+            {/* Moderation Banner */}
+            <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '50px',
-                border: '1px solid rgba(212, 175, 55, 0.4)',
-                background: 'rgba(212, 175, 55, 0.1)',
-                color: '#D4AF37',
-                fontSize: '12px',
-                fontFamily: '"DM Sans", sans-serif',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                letterSpacing: '0.04em',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(212,175,55,0.2)';
-                e.currentTarget.style.boxShadow = '0 0 14px rgba(212,175,55,0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(212,175,55,0.1)';
-                e.currentTarget.style.boxShadow = 'none';
+                gap: 8,
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: 8,
+                padding: '8px 14px',
+                marginBottom: 24,
               }}
             >
-              ✕ Close
-            </button>
-          ) : (
-            /* Countdown pill */
-            <div
-              style={{
-                padding: '5px 14px',
-                borderRadius: '50px',
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.05)',
-                color: 'rgba(255,255,255,0.45)',
-                fontSize: '12px',
-                fontFamily: '"DM Sans", sans-serif',
-                fontWeight: 500,
-                minWidth: '80px',
-                textAlign: 'center',
-              }}
-            >
-              Skip in {secondsLeft}s
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              <span style={{ fontSize: 12.5, color: '#1d4ed8', fontWeight: 600 }}>
+                Chats are moderated. Please keep it respectful!
+              </span>
             </div>
-          )}
-        </div>
 
-        {/* ── Video ── */}
-        <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', background: '#000' }}>
-          <video
-            ref={videoRef}
-            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-            muted
-            playsInline
-            loop
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'block',
-            }}
-          />
+            {/* Features */}
+            <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: 28 }}>
+              {features.map((f, i) => (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <div
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: '50%',
+                      background: '#faf5ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {f.icon}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: '#6b7280',
+                      textAlign: 'center',
+                      fontWeight: 600,
+                      whiteSpace: 'pre-line',
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {f.label}
+                  </span>
+                </div>
+              ))}
+            </div>
 
-          {/* Gold corner badge */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              background: 'linear-gradient(135deg, #D4AF37, #B8860B)',
-              color: '#000',
-              fontSize: '10px',
-              fontWeight: 700,
-              fontFamily: '"DM Sans", sans-serif',
-              letterSpacing: '0.1em',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              textTransform: 'uppercase',
-            }}
-          >
-            Ad
+            {/* FAQ */}
+            <h2 style={{ fontWeight: 800, fontSize: 16, color: '#1e1b4b', marginBottom: 4, textAlign: 'center' }}>
+              Frequently Asked Questions
+            </h2>
+            <div>
+              {faqs.map((faq, i) => (
+                <FAQItem
+                  key={i}
+                  question={faq.q}
+                  answer={faq.a}
+                  isOpen={openFaq === i}
+                  onToggle={() => setOpenFaq(openFaq === i ? null : i)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* ── Footer CTA ── */}
-        <div
-          style={{
-            padding: '14px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
-            flexWrap: 'wrap',
-          }}
-        >
-          <p
-            style={{
-              fontFamily: '"DM Sans", sans-serif',
-              fontSize: '13px',
-              color: 'rgba(255,255,255,0.45)',
-              lineHeight: 1.4,
-            }}
-          >
-            Experience Mingle Premium — connect instantly worldwide.
-          </p>
-
-          <a
-            href="#"
-            onClick={(e) => e.preventDefault()}
-            style={{
-              flexShrink: 0,
-              padding: '8px 20px',
-              borderRadius: '50px',
-              background: 'linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%)',
-              color: '#000',
-              fontSize: '12px',
-              fontWeight: 700,
-              fontFamily: '"DM Sans", sans-serif',
-              textDecoration: 'none',
-              letterSpacing: '0.06em',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Learn More ✦
-          </a>
-        </div>
+          {/* Footer */}
+          <footer style={{ marginTop: 20, textAlign: 'center', color: '#9ca3af', fontSize: 12 }}>
+            © {new Date().getFullYear()} Mingle.com &nbsp;|&nbsp;
+            <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Blog</a> &nbsp;|&nbsp;
+            <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Rules</a> &nbsp;|&nbsp;
+            <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Terms</a> &nbsp;|&nbsp;
+            <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Privacy</a>
+          </footer>
+        </main>
       </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════════════════
-   PARTICLE CANVAS — animated background
-   ══════════════════════════════════════════════════════════════════════ */
-function ParticleCanvas() {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let animId;
-    const particles = [];
-    const PARTICLE_COUNT = 80;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 1.5 + 0.3,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        alpha: Math.random() * 0.6 + 0.1,
-      });
-    }
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      /* Connections */
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            const opacity = (1 - dist / 120) * 0.12;
-            ctx.strokeStyle = `rgba(212,175,55,${opacity})`;
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      /* Dots */
-      particles.forEach((p) => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(212,175,55,${p.alpha})`;
-        ctx.fill();
-
-        p.x += p.vx;
-        p.y += p.vy;
-
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
-      });
-
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}
-    />
-  );
-}
-
-/* ── Feature card ───────────────────────────────────────────────────── */
-function FeatureCard({ icon, title, desc, delay }) {
-  return (
-    <div
-      className="glass rounded-2xl p-5 flex flex-col gap-2 transition-all duration-300"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <div className="text-2xl">{icon}</div>
-      <div className="font-semibold text-white/90 text-sm">{title}</div>
-      <div className="text-white/45 text-xs leading-relaxed">{desc}</div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════════════════
-   HOME PAGE
-   ══════════════════════════════════════════════════════════════════════ */
-export default function Home() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
-  /* ── Ad popup: show once per session ── */
-  const [showAd, setShowAd] = useState(false);
-
-  useEffect(() => {
-    if (!sessionStorage.getItem('mingle_ad_shown')) {
-      setShowAd(true);
-      sessionStorage.setItem('mingle_ad_shown', 'true');
-    }
-  }, []);
-
-  const handleCloseAd = () => setShowAd(false);
-
-  const handleStart = () => {
-    setIsLoading(true);
-    router.push('/chat');
-  };
-
-  return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: 'var(--obsidian)' }}>
-
-      {/* Noise grain */}
-      <div className="noise-overlay" aria-hidden="true" />
-
-      {/* Particle network */}
-      <ParticleCanvas />
-
-      {/* Background orbs */}
-      <div
-        aria-hidden="true"
-        style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}
-      >
-        <div style={{
-          position: 'absolute', top: '-20%', left: '-15%',
-          width: '55vw', height: '55vw', maxWidth: 700, maxHeight: 700,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%)',
-          animation: 'orb1 14s ease-in-out infinite',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '-20%', right: '-15%',
-          width: '50vw', height: '50vw', maxWidth: 650, maxHeight: 650,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(184,134,11,0.07) 0%, transparent 70%)',
-          animation: 'orb2 18s ease-in-out infinite',
-        }} />
-        <div style={{
-          position: 'absolute', top: '40%', left: '50%',
-          transform: 'translate(-50%,-50%)',
-          width: '40vw', height: '40vw', maxWidth: 500, maxHeight: 500,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(212,175,55,0.04) 0%, transparent 70%)',
-          animation: 'orb3 11s ease-in-out infinite',
-        }} />
-      </div>
-
-      {/* ── Content ── */}
-      <div className="relative z-10 flex flex-col items-center text-center px-6 py-12 max-w-2xl w-full">
-
-        {/* Crown icon — uses .animate-float defined in globals.css */}
-        <div
-          className="animate-float mb-4"
-          style={{ fontSize: 56, filter: 'drop-shadow(0 0 20px rgba(212,175,55,0.6))', lineHeight: 1 }}
-        >
-          ♛
-        </div>
-
-        {/* Logo */}
-        <h1
-          className="font-bold mb-2"
-          style={{
-            fontFamily: '"Playfair Display", serif',
-            fontSize: 'clamp(3rem, 10vw, 6rem)',
-            background: 'linear-gradient(135deg, #FFD700 0%, #D4AF37 40%, #B8860B 80%, #FFD700 100%)',
-            backgroundSize: '200% auto',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            animation: 'shimmer 3s linear infinite',
-            letterSpacing: '-0.02em',
-            lineHeight: 1,
-          }}
-        >
-          Mingle
-        </h1>
-
-        {/* Tagline */}
-        <p
-          style={{
-            fontFamily: '"Playfair Display", serif',
-            fontStyle: 'italic',
-            fontSize: 'clamp(0.95rem, 2.5vw, 1.2rem)',
-            color: 'rgba(212,175,55,0.75)',
-            letterSpacing: '0.15em',
-            marginBottom: '8px',
-          }}
-        >
-          Connect. Explore. Mingle.
-        </p>
-
-        {/* Divider */}
-        <div
-          className="my-5 w-40"
-          style={{ height: 1, background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)' }}
-        />
-
-        {/* Subtext */}
-        <p className="text-white/50 text-sm mb-8 max-w-md leading-relaxed">
-          Meet strangers from around the world instantly. No sign‑up. No filters. Pure, anonymous connection.
-        </p>
-
-        {/* START button */}
-        <button
-          onClick={handleStart}
-          disabled={isLoading}
-          className="btn-gold rounded-full"
-          style={{
-            padding: '18px 64px',
-            fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
-            letterSpacing: '0.2em',
-            boxShadow: '0 0 30px rgba(212,175,55,0.5), 0 0 80px rgba(212,175,55,0.2)',
-            minWidth: 220,
-            fontFamily: '"Playfair Display", serif',
-            fontWeight: 700,
-          }}
-          aria-label="Start video chat"
-        >
-          {isLoading ? (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'center' }}>
-              <span style={{
-                width: 20, height: 20,
-                border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#000',
-                borderRadius: '50%', display: 'inline-block',
-                animation: 'spin 0.7s linear infinite',
-              }} />
-              Connecting…
-            </span>
-          ) : (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
-              ✦ START ✦
-            </span>
-          )}
-        </button>
-
-        {/* Notice */}
-        <p className="text-white/30 text-xs mt-4">
-          By continuing you agree to our{' '}
-          <span style={{ color: 'var(--gold-muted)', textDecoration: 'underline', cursor: 'pointer' }}>Terms</span>
-          {' '}and{' '}
-          <span style={{ color: 'var(--gold-muted)', textDecoration: 'underline', cursor: 'pointer' }}>Guidelines</span>
-        </p>
-
-        {/* Feature cards */}
-        <div className="grid grid-cols-3 gap-3 mt-12 w-full max-w-lg">
-          <FeatureCard icon="🌍" title="Worldwide"  desc="Connect with people from every corner of the globe instantly." delay={0}   />
-          <FeatureCard icon="🔒" title="Anonymous"  desc="Zero sign-up. Your identity stays yours, always."              delay={100} />
-          <FeatureCard icon="⚡" title="Instant"    desc="Match in seconds. No waiting, no queues."                      delay={200} />
-        </div>
-
-        {/* Footer */}
-        <p className="text-white/20 text-xs mt-10 tracking-widest uppercase">
-          © 2025 Mingle — All Rights Reserved
-        </p>
-      </div>
-
-      {/* ── Ad popup (renders above everything, session-scoped) ── */}
-      {showAd && <AdPopup onClose={handleCloseAd} />}
-    </main>
+    </>
   );
 }
