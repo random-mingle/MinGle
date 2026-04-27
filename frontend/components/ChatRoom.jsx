@@ -398,7 +398,7 @@ export default function ChatRoom() {
       <div style={{
   display: 'flex',
   flexDirection: 'column',
-  gap: 10,
+  gap: 6,
   height: '40%',
 }}>
 
@@ -413,6 +413,7 @@ export default function ChatRoom() {
   gap: 16,
   width: '100%',
   maxWidth: 900,
+   maxHeight: '320px',
   margin: '0 auto 16px',
 }}>
                 {/* Stranger video */}
@@ -559,7 +560,7 @@ export default function ChatRoom() {
 <div
   style={{
     background: 'white',
-    flex: 0.6,                 // ✅ IKKADE
+    flex: 0.4,                 // ✅ IKKADE
     display: 'flex',         // ✅ IKKADE
     flexDirection: 'column', // ✅ IKKADE
     borderRadius: 16,
@@ -569,7 +570,7 @@ export default function ChatRoom() {
 
               {/* Messages */}
               <div style={{
-height: '150px',
+height: '80px',
 overflowY: 'auto',
 padding: '12px 16px',
 display: 'flex',
