@@ -415,8 +415,9 @@ export default function ChatRoom() {
               flexDirection: isMobile ? 'column' : 'row',
               gap: isMobile ? 4 : 8,
               padding: isMobile ? '6px 6px 0' : '10px 10px 0',
+               alignItems: 'stretch',
               justifyContent: 'center',   // ✅ center
-              maxWidth: 1000,             // ✅ limit width
+              maxWidth: 1200,             // ✅ limit width
               margin: '0 auto',           // ✅ center align
               width: '100%',
               background: '#f9f7ff',         // ✅ bonus clean bg
