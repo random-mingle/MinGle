@@ -353,44 +353,92 @@ export default function ChatRoom() {
       background: 'linear-gradient(135deg, #f5f0ff 0%, #fdf2f8 50%, #f0f4ff 100%)',
       fontFamily: 'Nunito, sans-serif',
     }}>
-      {/* ── Header ── */}
-      <header style={{
-        background: 'white',
-        borderBottom: '1px solid #ede9fe',
-        padding: '10px 20px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        position: 'sticky', top: 0, zIndex: 40,
-        boxShadow: '0 2px 12px rgba(124,58,237,0.08)',
-        marginBottom: 0,
-      }}>
-        <button onClick={() => router.push('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-          <Image src="/logo.png" alt="Mingle" width={90} height={34} style={{ objectFit: 'contain' }} />
-        </button>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <StatusBadge status={status} />
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: '#f5f0ff', borderRadius: 20, padding: '5px 12px',
-            fontSize: 12, fontWeight: 700, color: '#374151',
-          }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
-            <span style={{ color: '#7c3aed' }}>{onlineCount > 0 ? `${onlineCount.toLocaleString()}+` : '–'}</span>&nbsp;online
-          </div>
-        </div>
-      </header>
-
-{/* ✅ AD BANNER TOP LO */}
-<div style={{
-  width: '100%',
-  padding: '6px 10px',
+ {/* ── Header ── */}
+<header style={{
+  background: 'white',
+  borderBottom: '1px solid #ede9fe',
+  padding: '8px 12px',
   display: 'flex',
-  justifyContent: 'center',
+  alignItems: 'center',
+  gap: 8,
+  position: 'sticky',
+  top: 0,
+  zIndex: 40,
+  boxShadow: '0 2px 12px rgba(124,58,237,0.08)',
+  flexWrap: 'wrap', // ✅ mobile lo break avvadaniki
 }}>
-  <div style={{ width: '100%', maxWidth: 900 }}>
-    <AdBanner />
+
+  {/* 🔹 LOGO */}
+  <button
+    onClick={() => router.push('/')}
+    style={{
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: 0,
+      flexShrink: 0,
+    }}
+  >
+    <Image
+      src="/logo.png"
+      alt="Mingle"
+      width={80}
+      height={30}
+      style={{ objectFit: 'contain' }}
+    />
+  </button>
+
+  {/* 🔹 RIGHT SIDE (STATUS + ONLINE) */}
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    marginLeft: 'auto',
+    flexShrink: 0,
+  }}>
+    <StatusBadge status={status} />
+
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6,
+      background: '#f5f0ff',
+      borderRadius: 20,
+      padding: '4px 10px',
+      fontSize: 11,
+      fontWeight: 700,
+      color: '#374151',
+      whiteSpace: 'nowrap',
+    }}>
+      <span style={{
+        width: 7,
+        height: 7,
+        borderRadius: '50%',
+        background: '#10b981',
+        display: 'inline-block'
+      }} />
+      <span style={{ color: '#7c3aed' }}>
+        {onlineCount > 0 ? `${onlineCount}+` : '–'}
+      </span>
+    </div>
   </div>
-</div>
+
+  {/* 🔥 AD (CENTER / MOBILE BELOW) */}
+  <div style={{
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: 6,
+  }}>
+    <div style={{
+      width: '100%',
+      maxWidth: 380,
+    }}>
+      <AdBanner />
+    </div>
+  </div>
+
+</header>
 
       {/* ── Main ── */}
      <div style={{
