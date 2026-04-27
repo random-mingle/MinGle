@@ -308,9 +308,8 @@ export default function HomePage() {
 
   <button
     onClick={() => {
-      setMode('text');
-      handleStart();
-    }}
+  router.push('/text?mode=text');
+}}
     style={{
       padding: '10px 36px',
       borderRadius: 10,
@@ -330,10 +329,9 @@ export default function HomePage() {
   <span style={{ color: '#9ca3af', fontSize: 13 }}>or</span>
 
   <button
-    onClick={() => {
-      setMode('video');
-      handleStart();
-    }}
+   onClick={() => {
+  router.push('/chat?mode=video');
+}}
     style={{
       padding: '10px 36px',
       borderRadius: 10,
