@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import AdPopup from '@/components/AdPopup';
+import AdPopup from '../components/AdPopup';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://mingle-kfcz.onrender.com';
 
