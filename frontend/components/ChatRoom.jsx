@@ -424,7 +424,7 @@ export default function ChatRoom() {
               flex: 1, position: 'relative',
               borderRadius: isMobile ? 10 : 14,
               overflow: 'hidden', background: '#1a1535',
-              minHeight: 0,aspectRatio: '3 / 4',width: '100%',  
+              minHeight: 0,aspectRatio: '3 / 4',  
               boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
             }}>
               <video ref={remoteVideoRef} autoPlay playsInline
@@ -455,7 +455,7 @@ export default function ChatRoom() {
               flex: 1, position: 'relative',
               borderRadius: isMobile ? 10 : 14,
               overflow: 'hidden', background: '#0f1724',
-              minHeight: 0, aspectRatio: '3 / 4', width: '100%',  
+              minHeight: 0, aspectRatio: '3 / 4',
               boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
             }}>
               <video ref={localVideoRef} autoPlay playsInline muted
