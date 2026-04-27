@@ -300,46 +300,57 @@ export default function HomePage() {
             </p>
 
             {/* Mode Toggle */}
-            <p style={{ textAlign: 'center', fontSize: 13, color: '#6b7280', marginBottom: 10, fontWeight: 600 }}>
-              Start chatting
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <button
-                onClick={() => setMode('text')}
-                style={{
-                  padding: '10px 36px',
-                  borderRadius: 10,
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: 15,
-                  fontFamily: 'inherit',
-                  background: mode === 'text' ? '#7c3aed' : '#ede9fe',
-                  color: mode === 'text' ? 'white' : '#7c3aed',
-                  transition: 'all 0.2s',
-                }}
-              >
-                Text
-              </button>
-              <span style={{ color: '#9ca3af', fontSize: 13 }}>or</span>
-              <button
-                onClick={() => setMode('video')}
-                style={{
-                  padding: '10px 36px',
-                  borderRadius: 10,
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: 15,
-                  fontFamily: 'inherit',
-                  background: mode === 'video' ? '#7c3aed' : '#ede9fe',
-                  color: mode === 'video' ? 'white' : '#7c3aed',
-                  transition: 'all 0.2s',
-                }}
-              >
-                Video
-              </button>
-            </div>
+      <p style={{ textAlign: 'center', fontSize: 13, color: '#6b7280', marginBottom: 10, fontWeight: 600 }}>
+  Start chatting
+</p>
+
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+
+  <button
+    onClick={() => {
+      setMode('text');
+      handleStart();
+    }}
+    style={{
+      padding: '10px 36px',
+      borderRadius: 10,
+      border: 'none',
+      cursor: 'pointer',
+      fontWeight: 700,
+      fontSize: 15,
+      fontFamily: 'inherit',
+      background: mode === 'text' ? '#7c3aed' : '#ede9fe',
+      color: mode === 'text' ? 'white' : '#7c3aed',
+      transition: 'all 0.2s',
+    }}
+  >
+    Text
+  </button>
+
+  <span style={{ color: '#9ca3af', fontSize: 13 }}>or</span>
+
+  <button
+    onClick={() => {
+      setMode('video');
+      handleStart();
+    }}
+    style={{
+      padding: '10px 36px',
+      borderRadius: 10,
+      border: 'none',
+      cursor: 'pointer',
+      fontWeight: 700,
+      fontSize: 15,
+      fontFamily: 'inherit',
+      background: mode === 'video' ? '#7c3aed' : '#ede9fe',
+      color: mode === 'video' ? 'white' : '#7c3aed',
+      transition: 'all 0.2s',
+    }}
+  >
+    Video
+  </button>
+
+</div>
 
             {/* Interests */}
             <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 8, fontWeight: 600 }}>
@@ -367,36 +378,6 @@ export default function HomePage() {
               onFocus={(e) => (e.target.style.borderColor = '#a78bfa')}
               onBlur={(e) => (e.target.style.borderColor = '#ede9fe')}
             />
-
-            {/* Start Button */}
-            <button
-              onClick={handleStart}
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: 10,
-                border: 'none',
-                background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
-                color: 'white',
-                fontWeight: 800,
-                fontSize: 16,
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-                marginBottom: 14,
-                boxShadow: '0 4px 16px rgba(124,58,237,0.35)',
-                transition: 'transform 0.15s, box-shadow 0.15s',
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-1px)';
-                e.target.style.boxShadow = '0 6px 20px rgba(124,58,237,0.45)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 4px 16px rgba(124,58,237,0.35)';
-              }}
-            >
-              Start {mode === 'video' ? '📹' : '💬'} Chat
-            </button>
 
             {/* Moderation Banner */}
             <div
