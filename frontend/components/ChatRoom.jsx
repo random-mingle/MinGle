@@ -533,75 +533,6 @@ export default function ChatRoom() {
                 </div>
               </div>
             )}
-
-            {/* ── Controls Row ── */}
-            <div style={{
-              background: 'white', borderRadius: 14, padding: '12px 16px',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              boxShadow: '0 2px 12px rgba(124,58,237,0.08)', marginBottom: 10, gap: 8,
-            }}>
-              {/* Left: media toggles */}
-              {mode === 'video' && (
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <IconBtn onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'} active={isMuted}>
-                    {isMuted
-                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                      : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                    }
-                  </IconBtn>
-                  <IconBtn onClick={toggleCam} title={isCamOff ? 'Enable camera' : 'Disable camera'} active={isCamOff} danger={isCamOff}>
-                    {isCamOff
-                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 21H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3m3-3h6l2 3h4a2 2 0 0 1 2 2v9.34m-7.72-2.06a4 4 0 1 1-5.56-5.56"/></svg>
-                      : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                    }
-                  </IconBtn>
-                </div>
-              )}
-
-              {/* Right: Start / Next / Stop */}
-              <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-                <button
-                  onClick={handleStart}
-                  disabled={status === 'waiting'}
-                  style={{
-                    padding: '8px 20px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', color: 'white',
-                    fontWeight: 800, fontSize: 14, fontFamily: 'inherit',
-                    boxShadow: '0 3px 12px rgba(124,58,237,0.35)',
-                    opacity: status === 'waiting' ? 0.7 : 1, transition: 'all 0.15s',
-                  }}
-                >
-                  Start
-                </button>
-                <button
-                  onClick={handleNext}
-                  disabled={status === 'idle'}
-                  style={{
-                    padding: '8px 20px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(135deg,#f59e0b,#d97706)', color: 'white',
-                    fontWeight: 800, fontSize: 14, fontFamily: 'inherit',
-                    boxShadow: '0 3px 12px rgba(245,158,11,0.3)',
-                    opacity: status === 'idle' ? 0.5 : 1, transition: 'all 0.15s',
-                  }}
-                >
-                  Next ⏩
-                </button>
-                <button
-                  onClick={handleStop}
-                  disabled={status === 'idle'}
-                  style={{
-                    padding: '8px 20px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: 'white',
-                    fontWeight: 800, fontSize: 14, fontFamily: 'inherit',
-                    boxShadow: '0 3px 12px rgba(239,68,68,0.3)',
-                    opacity: status === 'idle' ? 0.5 : 1, transition: 'all 0.15s',
-                  }}
-                >
-                  Stop ⏹
-                </button>
-              </div>
-            </div>
-
             {/* ── Chat ── */}
             <div style={{
               background: 'white', borderRadius: 14,
@@ -666,46 +597,81 @@ export default function ChatRoom() {
                 ))}
                 <div ref={chatEndRef} />
               </div>
-
-              {/* Input */}
-              <div style={{
-                padding: '10px 12px', borderTop: '1px solid #f3f4f6',
-                display: 'flex', gap: 8, alignItems: 'center',
-              }}>
-                <input
-                  type="text"
-                  placeholder={status === 'connected' ? 'Type a message...' : 'Connect to chat...'}
-                  value={inputMsg}
-                  onChange={(e) => setInputMsg(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendMsg()}
-                  disabled={status !== 'connected'}
-                  style={{
-                    flex: 1, padding: '9px 14px', borderRadius: 22,
-                    border: '1.5px solid #ede9fe', fontSize: 14, fontFamily: 'inherit',
-                    outline: 'none', color: '#374151',
-                    background: status !== 'connected' ? '#fafafa' : 'white',
-                    opacity: status !== 'connected' ? 0.7 : 1,
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = '#a78bfa')}
-                  onBlur={(e) => (e.target.style.borderColor = '#ede9fe')}
-                />
-                <button
-                  onClick={handleSendMsg}
-                  disabled={status !== 'connected' || !inputMsg.trim()}
-                  style={{
-                    width: 38, height: 38, borderRadius: '50%', border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', color: 'white',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    opacity: status !== 'connected' || !inputMsg.trim() ? 0.5 : 1,
-                    boxShadow: '0 2px 8px rgba(124,58,237,0.3)', transition: 'all 0.15s',
-                  }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                  </svg>
-                </button>
               </div>
-            </div>
+
+  {/* Input */}
+<div
+  style={{
+    padding: '10px 12px',
+    borderTop: '1px solid #f3f4f6',
+    display: 'flex',
+    gap: 8,
+    alignItems: 'center',
+  }}
+>
+  <input
+    type="text"
+    placeholder={status === 'connected' ? 'Type a message...' : 'Click Start to chat...'}
+    value={inputMsg}
+    onChange={(e) => setInputMsg(e.target.value)}
+    onKeyDown={(e) => e.key === 'Enter' && handleSendMsg()}
+    disabled={status !== 'connected'}
+    style={{
+      flex: 1,
+      padding: '9px 14px',
+      borderRadius: 22,
+      border: '1.5px solid #ede9fe',
+      fontSize: 14,
+      fontFamily: 'inherit',
+      outline: 'none',
+      color: '#374151',
+      background: status !== 'connected' ? '#fafafa' : 'white',
+      opacity: status !== 'connected' ? 0.7 : 1,
+    }}
+    onFocus={(e) => (e.target.style.borderColor = '#a78bfa')}
+    onBlur={(e) => (e.target.style.borderColor = '#ede9fe')}
+  />
+
+  {/* START BUTTON */}
+  <button
+    onClick={handleStart}
+    style={{
+      padding: '8px 16px',
+      borderRadius: 20,
+      border: 'none',
+      cursor: 'pointer',
+      background: 'linear-gradient(135deg,#7c3aed,#6d28d9)',
+      color: 'white',
+      fontWeight: 800,
+      fontSize: 13,
+    }}
+  >
+    Start
+  </button>
+
+  {/* SEND BUTTON */}
+  <button
+    onClick={handleSendMsg}
+    disabled={status !== 'connected' || !inputMsg.trim()}
+    style={{
+      width: 38,
+      height: 38,
+      borderRadius: '50%',
+      border: 'none',
+      cursor: 'pointer',
+      background: 'linear-gradient(135deg,#7c3aed,#6d28d9)',
+      color: 'white',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      opacity: status !== 'connected' || !inputMsg.trim() ? 0.5 : 1,
+    }}
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+    </svg>
+  </button>
+</div>
 
             {/* ── Ad Banner ── */}
             <AdBanner />
