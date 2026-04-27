@@ -393,6 +393,7 @@ export default function ChatRoom() {
   height: 'calc(100vh - 70px)',
   display: 'flex',
   flexDirection: 'column',
+  overflow: 'hidden', 
 }}>
 
       <div style={{
@@ -412,7 +413,8 @@ export default function ChatRoom() {
   gridTemplateColumns: '1fr 1fr',
   gap: 16,
   width: '100%',
-  maxWidth: 900,
+  maxWidth: 1100,
+    height: '55%',
    maxHeight: '320px',
   margin: '0 auto 16px',
 }}>
@@ -570,7 +572,7 @@ export default function ChatRoom() {
 
               {/* Messages */}
               <div style={{
-height: '80px',
+height: '20px',
 overflowY: 'auto',
 padding: '12px 16px',
 display: 'flex',
@@ -620,7 +622,7 @@ gap: 8,
   {/* Input */}
 <div
   style={{
-    padding: '10px 12px',
+    height: '60px', 
     borderTop: '1px solid #f3f4f6',
     display: 'flex',
     gap: 8,
