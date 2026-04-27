@@ -349,7 +349,8 @@ export default function ChatRoom() {
   // ── Render ─────────────────────────────────────────────────────────────
   return (
     <div style={{
-      minHeight: '100vh',
+  height: '100vh',
+  overflow: 'hidden',
       background: 'linear-gradient(135deg, #f5f0ff 0%, #fdf2f8 50%, #f0f4ff 100%)',
       fontFamily: 'Nunito, sans-serif',
     }}>
@@ -380,25 +381,39 @@ export default function ChatRoom() {
       </header>
 
       {/* ── Main ── */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 12px' }}>
-        <div style={{
-          display: 'flex', gap: 16, flexWrap: 'wrap',
-        }}>
+     <div style={{
+  maxWidth: 1200,
+  margin: '0 auto',
+  padding: '10px',
+  height: 'calc(100vh - 70px)',
+  display: 'flex',
+  flexDirection: 'column',
+}}>
+
+      <div style={{
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 10,
+  height: '100%',
+  height: '40%',
+}}>
+
 
           {/* ── Left: Video + Chat ── */}
           <div style={{ flex: 1, minWidth: 280 }}>
             {/* Video panels (only for video mode) */}
             {mode === 'video' && (
-  <div style={{
+<div style={{
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
-  gap: 10,
-  maxWidth: 640,
-  margin: '0 auto 12px',
+  gap: 16,
+  width: '100%',
+  maxWidth: 900,
+  margin: '0 auto 16px',
 }}>
                 {/* Stranger video */}
                 <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden',
-                  background: '#1e1b4b', aspectRatio: '5/4',
+                  background: '#1e1b4b', height: '100%',
                   boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
                 }}>
                   <video
@@ -446,7 +461,7 @@ export default function ChatRoom() {
 
                 {/* Self video */}
                 <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden',
-                  background: '#111827', aspectRatio: '4/3',
+                  background: '#111827', height: '100%',
                   boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
                 }}>
                   <video
@@ -536,18 +551,23 @@ export default function ChatRoom() {
                 </div>
               </div>
             )}
-            {/* ── Chat ── */}
-            <div style={{
-              background: 'white', borderRadius: 14,
-              boxShadow: '0 2px 12px rgba(124,58,237,0.08)',
-              display: 'flex', flexDirection: 'column', overflow: 'hidden',
-            }}>
+          {/* CHAT BOX */}
+<div
+  style={{
+    background: 'white',
+    flex: 1,                 // ✅ IKKADE
+    display: 'flex',         // ✅ IKKADE
+    flexDirection: 'column', // ✅ IKKADE
+    borderRadius: 16,
+    overflow: 'hidden',
+  }}
+>
 
               {/* Messages */}
               <div style={{
                 flex: 1, overflowY: 'auto', padding: '12px 16px',
                 display: 'flex', flexDirection: 'column', gap: 8,
-                minHeight: 180, maxHeight: 260,
+                minHeight: 180, flex: 1,
               }}>
                 {messages.length === 0 && (
                   <div style={{ textAlign: 'center', color: '#d1d5db', fontSize: 13, marginTop: 20 }}>
@@ -597,6 +617,9 @@ export default function ChatRoom() {
     display: 'flex',
     gap: 8,
     alignItems: 'center',
+    position: 'sticky',
+    bottom: 0,
+    background: 'white',
   }}
 >
   <input
