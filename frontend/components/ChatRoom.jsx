@@ -454,12 +454,13 @@ export default function ChatRoom() {
   gap: 16,
   width: '100%',
   maxWidth: 1100,
-   height: '420px',
   margin: '0 auto 16px',
+   aspectRatio: '2 / 1', 
 }}>
                 {/* Stranger video */}
                 <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden',
-                  background: '#1e1b4b', height: '100%',
+                  background: '#1e1b4b', width: '100%',  
+                   aspectRatio: '3 / 4',  
                   boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
                 }}>
                   <video
@@ -507,7 +508,8 @@ export default function ChatRoom() {
 
                 {/* Self video */}
                 <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden',
-                  background: '#111827', height: '100%',
+                  background: '#111827', width: '100%',   
+                    aspectRatio: '3 / 4',
                   boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
                 }}>
                   <video
